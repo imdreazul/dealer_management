@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_dealer_root"
+              name="Dealer Management"
+              sequence="80"
+              web_icon="dealer_management,static/description/icon.png"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_dealer_dashboard"
+              name="Dashboard"
+              parent="menu_dealer_root"
+              sequence="1"
+              action="action_dealer_application"
+              groups="dealer_management.group_dealer_manager"/>
+
+    <!-- Applications -->
+    <menuitem id="menu_dealer_applications"
+              name="Applications"
+              parent="menu_dealer_root"
+              sequence="10"
+              groups="dealer_management.group_dealer_manager"/>
+
+    <menuitem id="menu_dealer_applications_all"
+              name="All Applications"
+              parent="menu_dealer_applications"
+              action="action_dealer_application"
+              sequence="1"/>
+
+    <menuitem id="menu_dealer_applications_pending"
+              name="Pending Review"
+              parent="menu_dealer_applications"
+              action="action_dealer_application"
+              sequence="2"/>
+
+    <!-- Dealers -->
+    <menuitem id="menu_dealers"
+              name="Dealers"
+              parent="menu_dealer_root"
+              sequence="20"
+              groups="dealer_management.group_dealer_manager"/>
+
+    <menuitem id="menu_dealers_list"
+              name="All Dealers"
+              parent="menu_dealers"
+              action="action_dealer_dealer"
+              sequence="1"/>
+
+    <menuitem id="menu_dealer_reviews"
+              name="Reviews"
+              parent="menu_dealers"
+              action="action_dealer_review"
+              sequence="2"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_dealer_config"
+              name="Configuration"
+              parent="menu_dealer_root"
+              sequence="90"
+              groups="dealer_management.group_dealer_manager"/>
+
+    <menuitem id="menu_dealer_plans"
+              name="Dealer Plans"
+              parent="menu_dealer_config"
+              action="action_dealer_plan"
+              sequence="1"/>
+
+    <menuitem id="menu_dealer_settings"
+              name="Settings"
+              parent="menu_dealer_config"
+              action="base_setup.action_general_configuration"
+              sequence="10"/>
+</odoo>

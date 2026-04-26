@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dealer_plan_manager,dealer.plan.manager,model_dealer_plan,group_dealer_manager,1,1,1,1
+access_dealer_plan_public,dealer.plan.public,model_dealer_plan,base.group_public,1,0,0,0
+access_dealer_plan_portal,dealer.plan.portal,model_dealer_plan,base.group_portal,1,0,0,0
+access_dealer_plan_user,dealer.plan.user,model_dealer_plan,base.group_user,1,0,0,0
+access_dealer_plan_feature_manager,dealer.plan.feature.manager,model_dealer_plan_feature,group_dealer_manager,1,1,1,1
+access_dealer_plan_feature_public,dealer.plan.feature.public,model_dealer_plan_feature,base.group_public,1,0,0,0
+access_dealer_application_manager,dealer.application.manager,model_dealer_application,group_dealer_manager,1,1,1,1
+access_dealer_application_public,dealer.application.public,model_dealer_application,base.group_public,0,0,1,0
+access_dealer_application_portal,dealer.application.portal,model_dealer_application,base.group_portal,1,1,1,0
+access_dealer_dealer_manager,dealer.dealer.manager,model_dealer_dealer,group_dealer_manager,1,1,1,1
+access_dealer_dealer_portal,dealer.dealer.portal,model_dealer_dealer,base.group_portal,1,1,0,0
+access_dealer_dealer_public,dealer.dealer.public,model_dealer_dealer,base.group_public,1,0,0,0
+access_dealer_dealer_user,dealer.dealer.user,model_dealer_dealer,base.group_user,1,0,0,0
+access_dealer_review_manager,dealer.review.manager,model_dealer_review,group_dealer_manager,1,1,1,1
+access_dealer_review_public,dealer.review.public,model_dealer_review,base.group_public,1,0,1,0
+access_dealer_review_portal,dealer.review.portal,model_dealer_review,base.group_portal,1,0,1,0

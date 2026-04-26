@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dealer_dealer_tree" model="ir.ui.view">
+        <field name="name">dealer.dealer.tree</field>
+        <field name="model">dealer.dealer</field>
+        <field name="arch" type="xml">
+            <tree string="Dealers" decoration-muted="state != 'active'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="plan_id"/>
+                <field name="city"/>
+                <field name="state_id"/>
+                <field name="phone"/>
+                <field name="avg_rating" widget="priority" optional="show"/>
+                <field name="review_count" optional="show"/>
+                <field name="plan_expiry_date" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-danger="state == 'suspended'"
+                       decoration-warning="state == 'expired'"/>
+                <field name="is_website_published" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dealer_dealer_form" model="ir.ui.view">
+        <field name="name">dealer.dealer.form</field>
+        <field name="model">dealer.dealer</field>
+        <field name="arch" type="xml">
+            <form string="Dealer">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="active,suspended,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_orders" icon="fa-shopping-cart">
+                            <field name="sale_order_count" widget="statinfo" string="Orders"/>
+                        </button>
+<!--                        <button class="oe_stat_button" type="object"-->
+<!--                                name="action_view_reviews" icon="fa-star">-->
+<!--                            <field name="review_count" widget="statinfo" string="Reviews"/>-->
+<!--                        </button>-->
+                    </div>
+                    <field name="logo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Business Name..."/></h1>
+                    </div>
+                    <group>
+                        <group string="Contact">
+                            <field name="partner_id"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="website_url" widget="url"/>
+                        </group>
+                        <group string="Plan &amp; Status">
+                            <field name="plan_id"/>
+                            <field name="plan_start_date"/>
+                            <field name="plan_expiry_date"/>
+                            <field name="days_until_expiry" widget="integer"
+                                   invisible="not plan_expiry_date"/>
+                            <field name="is_website_published"/>
+                            <field name="space_type"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Location">
+                            <group>
+                                <group string="Address">
+                                    <field name="street"/>
+                                    <field name="city"/>
+                                    <field name="state_id"/>
+                                    <field name="country_id"/>
+                                    <field name="zip_code"/>
+                                </group>
+                                <group string="GPS">
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="About">
+                            <field name="description" widget="html"/>
+                        </page>
+                        <page string="Shop Images">
+                            <field name="shop_image_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="Reviews">
+                            <field name="review_ids">
+                                <tree string="Reviews" decoration-success="state == 'approved'"
+                                      decoration-muted="state == 'rejected'">
+                                    <field name="reviewer_name"/>
+                                    <field name="reviewer_email"/>
+                                    <field name="rating"/>
+                                    <field name="review"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'approved'"
+                                           decoration-warning="state == 'pending'"
+                                           decoration-danger="state == 'rejected'"/>
+                                    <button name="action_approve" type="object"
+                                            string="Approve" class="btn-sm btn-success"
+                                            invisible="state == 'approved'"/>
+                                    <button name="action_reject" type="object"
+                                            string="Reject" class="btn-sm btn-danger"
+                                            invisible="state == 'rejected'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_dealer_dealer_map" model="ir.ui.view">
+        <field name="name">dealer.dealer.map</field>
+        <field name="model">dealer.dealer</field>
+        <field name="arch" type="xml">
+            <tree string="Dealers Map" class="o_dealer_map_tree">
+                <field name="name"/>
+                <field name="city"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dealer_dealer_search" model="ir.ui.view">
+        <field name="name">dealer.dealer.search</field>
+        <field name="model">dealer.dealer</field>
+        <field name="arch" type="xml">
+            <search string="Search Dealers">
+                <field name="name"/>
+                <field name="city"/>
+                <field name="plan_id"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="Active" name="active_dealers" domain="[('state','=','active')]"/>
+                <filter string="Suspended" name="suspended" domain="[('state','=','suspended')]"/>
+                <filter string="Published" name="published" domain="[('is_website_published','=',True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Plan" name="groupby_plan" context="{'group_by': 'plan_id'}"/>
+                    <filter string="City" name="groupby_city" context="{'group_by': 'city'}"/>
+                    <filter string="Space Type" name="groupby_space" context="{'group_by': 'space_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_dealer_dealer" model="ir.actions.act_window">
+        <field name="name">Dealers</field>
+        <field name="res_model">dealer.dealer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active_dealers': 1}</field>
+    </record>
+
+    <record id="action_dealer_review" model="ir.actions.act_window">
+        <field name="name">Dealer Reviews</field>
+        <field name="res_model">dealer.review</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','pending')]</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+</odoo>

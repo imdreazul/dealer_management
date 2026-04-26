@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Inherit portal home to add dealer link -->
+<template id="portal_my_home_dealer" inherit_id="portal.portal_my_home" name="Portal - Dealer">
+    <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+        <t t-call="portal.portal_docs_entry">
+            <t t-set="title">My Dealer Profile</t>
+            <t t-set="url">/my/dealer/dashboard</t>
+            <t t-set="placeholder_count">dealer_count</t>
+        </t>
+    </xpath>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER PORTAL LAYOUT (Sidebar)
+════════════════════════════════════════ -->
+<template id="portal_dealer_layout" name="Dealer Portal Layout">
+    <t t-call="portal.portal_layout">
+        <t t-set="o_portal_fullwidth_alert" groups="base.group_portal"/>
+        <div class="row mt-3">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3 text-center">
+                        <div class="mb-2">
+                            <i class="fa fa-building fa-3x text-primary"/>
+                        </div>
+                        <h6 class="fw-bold mb-0"><t t-esc="dealer.name"/></h6>
+                        <p class="text-muted small mb-0"><t t-esc="dealer.plan_id.name"/></p>
+                        <span t-att-class="'badge mt-1 ' + ('bg-success' if dealer.state == 'active' else 'bg-warning')">
+                            <t t-esc="dealer.state.capitalize()"/>
+                        </span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/my/dealer/dashboard"
+                           t-att-class="'list-group-item list-group-item-action ' + ('active' if page_name == 'dealer_dashboard' else '')">
+                            <i class="fa fa-tachometer me-2"/>Dashboard
+                        </a>
+                        <a href="/my/dealer/profile"
+                           t-att-class="'list-group-item list-group-item-action ' + ('active' if page_name == 'dealer_profile' else '')">
+                            <i class="fa fa-user me-2"/>Profile
+                        </a>
+                        <a href="/my/dealer/orders"
+                           t-att-class="'list-group-item list-group-item-action ' + ('active' if page_name == 'dealer_orders' else '')">
+                            <i class="fa fa-shopping-cart me-2"/>Orders
+                        </a>
+                        <a href="/my/dealer/plan"
+                           t-att-class="'list-group-item list-group-item-action ' + ('active' if page_name == 'dealer_plan' else '')">
+                            <i class="fa fa-tag me-2"/>My Plan
+                        </a>
+                        <a href="/my/dealer/reviews"
+                           t-att-class="'list-group-item list-group-item-action ' + ('active' if page_name == 'dealer_reviews' else '')">
+                            <i class="fa fa-star me-2"/>Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-9 col-md-8">
+                <t t-out="0"/>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER DASHBOARD
+════════════════════════════════════════ -->
+<template id="portal_dealer_dashboard" name="Dealer Dashboard">
+    <t t-call="dealer_management.portal_dealer_layout">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fa fa-tachometer me-2"/>Dealer Dashboard</h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Stat Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3 col-6">
+                        <div class="card bg-primary text-white text-center p-3 border-0">
+                            <h3 class="fw-bold mb-0"><t t-esc="dealer.sale_order_count"/></h3>
+                            <p class="small mb-0">Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card bg-success text-white text-center p-3 border-0">
+                            <h3 class="fw-bold mb-0"><t t-esc="dealer.review_count"/></h3>
+                            <p class="small mb-0">Reviews</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card bg-warning text-dark text-center p-3 border-0">
+                            <h3 class="fw-bold mb-0"><t t-esc="round(dealer.avg_rating, 1)"/> ★</h3>
+                            <p class="small mb-0">Avg Rating</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div t-att-class="'card text-white text-center p-3 border-0 ' + ('bg-info' if dealer.days_until_expiry > 30 else 'bg-danger')">
+                            <h3 class="fw-bold mb-0"><t t-esc="dealer.days_until_expiry"/></h3>
+                            <p class="small mb-0">Days to Expiry</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Info -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="fw-bold mb-1">Current Plan: <t t-esc="dealer.plan_id.name or 'No Plan'"/></h6>
+                                <p class="text-muted small mb-0">
+                                    <t t-if="dealer.plan_start_date">Start: <t t-esc="dealer.plan_start_date"/></t>
+                                    <t t-if="dealer.plan_expiry_date"> | Expires: <t t-esc="dealer.plan_expiry_date"/></t>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                                <a href="/my/dealer/plan" class="btn btn-outline-primary btn-sm">View Plans</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <h5 class="fw-bold mb-3">Recent Orders</h5>
+                <t t-if="orders">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order</th><th>Date</th><th>Amount</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="orders" t-as="order">
+                                    <tr>
+                                        <td><a t-att-href="order.get_portal_url()"><t t-esc="order.name"/></a></td>
+                                        <td><t t-esc="order.date_order" t-options="{'widget':'date'}"/></td>
+                                        <td><t t-esc="order.amount_total"/> <t t-esc="order.currency_id.name"/></td>
+                                        <td>
+                                            <span t-att-class="'badge ' + ('bg-success' if order.state == 'sale' else 'bg-secondary')">
+                                                <t t-esc="order.state.upper()"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+                <t t-else="">
+                    <p class="text-muted">No orders yet.</p>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER PROFILE
+════════════════════════════════════════ -->
+<template id="portal_dealer_profile" name="Dealer Profile">
+    <t t-call="dealer_management.portal_dealer_layout">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fa fa-user me-2"/>My Profile</h4>
+            </div>
+            <div class="card-body p-4">
+                <t t-if="request.params.get('success')">
+                    <div class="alert alert-success"><i class="fa fa-check me-1"/>Profile updated successfully!</div>
+                </t>
+                <form action="/my/dealer/profile/save" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Business Name</label>
+                            <input type="text" name="company_name" class="form-control" t-att-value="dealer.name"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="tel" name="phone" class="form-control" t-att-value="dealer.phone or ''"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Website</label>
+                            <input type="url" name="website_url" class="form-control" t-att-value="dealer.website_url or ''"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">City</label>
+                            <input type="text" name="city" class="form-control" t-att-value="dealer.city or ''"/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Street Address</label>
+                            <input type="text" name="street" class="form-control" t-att-value="dealer.street or ''"/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">About Your Business</label>
+                            <textarea name="description" class="form-control" rows="4"><t t-esc="dealer.description or ''"/></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Read-only info -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6 class="fw-bold mb-2 text-muted">Read-Only Information</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <small class="text-muted">Email</small>
+                                <p class="fw-semibold mb-0"><t t-esc="dealer.email or dealer.partner_id.email or ''"/></p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Plan</small>
+                                <p class="fw-semibold mb-0"><t t-esc="dealer.plan_id.name or 'N/A'"/></p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Status</small>
+                                <p class="fw-semibold mb-0"><t t-esc="dealer.state.capitalize()"/></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save me-1"/>Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER ORDERS
+════════════════════════════════════════ -->
+<template id="portal_dealer_orders" name="Dealer Orders">
+    <t t-call="dealer_management.portal_dealer_layout">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fa fa-shopping-cart me-2"/>My Orders</h4>
+            </div>
+            <div class="card-body p-4">
+                <t t-if="orders">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order #</th><th>Date</th>
+                                    <th>Amount</th><th>Invoice</th><th>Status</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="orders" t-as="order">
+                                    <tr>
+                                        <td><a t-att-href="order.get_portal_url()"><t t-esc="order.name"/></a></td>
+                                        <td><t t-esc="order.date_order" t-options="{'widget':'date'}"/></td>
+                                        <td><t t-esc="order.amount_total"/> <t t-esc="order.currency_id.name"/></td>
+                                        <td><t t-esc="order.invoice_status or '-'"/></td>
+                                        <td>
+                                            <span t-att-class="'badge ' + ('bg-success' if order.state == 'sale' else ('bg-warning text-dark' if order.state == 'draft' else 'bg-secondary'))">
+                                                <t t-esc="order.state.capitalize()"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a t-att-href="order.get_portal_url()" class="btn btn-outline-primary btn-sm">View</a>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                    <t t-call="website.pager">
+                        <t t-set="access_token" t-value=""/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <div class="text-center text-muted py-5">
+                        <i class="fa fa-inbox fa-3x mb-3 d-block"/>
+                        <p>No orders found.</p>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER PLAN
+════════════════════════════════════════ -->
+<template id="portal_dealer_plan" name="Dealer Plan">
+    <t t-call="dealer_management.portal_dealer_layout">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fa fa-tag me-2"/>My Plan</h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Current Plan -->
+                <div class="card bg-primary text-white border-0 mb-4">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="fw-bold mb-1"><t t-esc="dealer.plan_id.name or 'No Active Plan'"/></h4>
+                                <p class="mb-0 opacity-75">
+                                    <t t-if="dealer.plan_expiry_date">
+                                        Expires on <t t-esc="dealer.plan_expiry_date"/>
+                                        (<t t-esc="dealer.days_until_expiry"/> days remaining)
+                                    </t>
+                                    <t t-else="">No expiry date set</t>
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fa-certificate fa-4x opacity-50"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Plans -->
+                <h5 class="fw-bold mb-3">Available Plans</h5>
+                <div class="row g-3">
+                    <t t-foreach="all_plans" t-as="plan">
+                        <div class="col-md-4">
+                            <div t-att-class="'card border h-100 ' + ('border-primary shadow' if plan.id == dealer.plan_id.id else '')">
+                                <div class="card-body text-center p-4">
+                                    <t t-if="plan.id == dealer.plan_id.id">
+                                        <span class="badge bg-primary mb-2">Current Plan</span>
+                                    </t>
+                                    <h5 class="fw-bold"><t t-esc="plan.name"/></h5>
+                                    <p class="text-muted small"><t t-esc="dict(plan._fields['plan_type'].selection).get(plan.plan_type)"/></p>
+                                    <h3 class="text-primary fw-bold">
+                                        <t t-esc="plan.price"/>
+                                        <small class="fs-6 text-muted"><t t-esc="plan.currency_id.name"/></small>
+                                    </h3>
+                                    <p class="text-muted small"><t t-esc="plan.validity_months"/> months</p>
+                                    <t t-if="plan.feature_ids">
+                                        <ul class="list-unstyled text-start small mt-3">
+                                            <t t-foreach="plan.feature_ids[:5]" t-as="feat">
+                                                <li>
+                                                    <i t-att-class="'fa me-1 ' + ('fa-check text-success' if feat.included else 'fa-times text-danger')"/>
+                                                    <t t-esc="feat.name"/>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- ════════════════════════════════════════
+     DEALER REVIEWS
+════════════════════════════════════════ -->
+<template id="portal_dealer_reviews" name="Dealer Reviews">
+    <t t-call="dealer_management.portal_dealer_layout">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fa fa-star me-2"/>My Reviews</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="me-4 text-center">
+                        <h1 class="fw-bold text-warning mb-0"><t t-esc="round(dealer.avg_rating, 1)"/></h1>
+                        <div class="text-warning">
+                            <t t-set="stars" t-value="range(1, 6)"/>
+                            <t t-foreach="stars" t-as="s">
+                                <i t-att-class="'fa fa-star' + ('' if s &lt;= dealer.avg_rating else '-o')"/>
+                            </t>
+                        </div>
+                        <small class="text-muted"><t t-esc="dealer.review_count"/> reviews</small>
+                    </div>
+                </div>
+
+                <t t-if="reviews">
+                    <t t-foreach="reviews" t-as="review">
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong><t t-esc="review.reviewer_name or 'Anonymous'"/></strong>
+                                    <div class="text-warning small">
+                                        <t t-set="r" t-value="int(review.rating)"/>
+                                        <t t-foreach="range(1,6)" t-as="s">
+                                            <i t-att-class="'fa fa-star' + ('' if s &lt;= r else '-o')"/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <small class="text-muted"><t t-esc="review.create_date" t-options="{'widget':'date'}"/></small>
+                            </div>
+                            <p class="mb-0 text-muted"><t t-esc="review.review"/></p>
+                        </div>
+                    </t>
+                </t>
+                <t t-else="">
+                    <div class="text-center text-muted py-5">
+                        <i class="fa fa-star-o fa-3x mb-3 d-block"/>
+                        <p>No approved reviews yet.</p>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
+
+</odoo>
