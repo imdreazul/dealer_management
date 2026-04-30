@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="template_application_status" name="Dealer Application Status">
+    <t t-call="website.layout">
+        <t t-set="title">Application Status</t>
+
+        <!-- HERO -->
+        <div style="background:linear-gradient(135deg,#0d1b4b 0%,#1565c0 60%,#0288d1 100%);min-height:160px;" class="position-relative overflow-hidden">
+            <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"/>
+            <div class="container py-5 position-relative" style="z-index:2;">
+                <h2 class="text-white fw-bold mb-1">
+                    <i class="fa fa-search me-2"/>Track Application
+                </h2>
+                <p style="color:rgba(255,255,255,0.8);" class="mb-0">
+                    Check the current status of your dealer application.
+                </p>
+            </div>
+        </div>
+        <div class="bg-light border-bottom py-2">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 small">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/become-a-dealer">Become a Dealer</a></li>
+                        <li class="breadcrumb-item active">Application Status</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+
+                    <!-- Search bar (always visible) -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fa fa-ticket me-2 text-primary"/>Enter Reference Code
+                            </h6>
+                            <form method="GET" action="/dealer-status">
+                                <div class="input-group">
+                                    <input type="text" name="ref_code" class="form-control"
+                                           t-att-value="ref_code or ''"
+                                           placeholder="e.g. DA/2025/00001"
+                                           style="border-radius:8px 0 0 8px;"/>
+                                    <button type="submit" class="btn btn-primary"
+                                            style="border-radius:0 8px 8px 0;">
+                                        <i class="fa fa-search me-1"/>Track
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Not found -->
+                    <t t-if="not_found">
+                        <div class="alert alert-warning d-flex align-items-center gap-3" style="border-radius:10px;">
+                            <span style="font-size:2rem;">🔍</span>
+                            <div>
+                                <strong>Application not found.</strong>
+                                <p class="mb-0 small text-muted">
+                                    No application found for reference <strong t-esc="ref_code"/>. Please check the code and try again.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="/become-a-dealer" class="btn btn-primary">
+                                <i class="fa fa-edit me-2"/>Submit a New Application
+                            </a>
+                        </div>
+                    </t>
+
+                    <!-- Application found -->
+                    <t t-if="app">
+                        <!-- Status timeline -->
+                        <div class="card border-0 shadow mb-4" style="border-radius:12px;overflow:hidden;">
+                            <div class="card-header py-3 px-4 border-0"
+                                 t-att-style="'background:linear-gradient(90deg,' + ('#2e7d32,#43a047' if app.state == 'done' else '#c62828,#e53935' if app.state == 'declined' else '#1565c0,#0288d1') + ')'"  >
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="text-white mb-0 fw-bold">
+                                        Application: <t t-esc="app.ref_code"/>
+                                    </h6>
+                                    <t t-if="app.state == 'draft'">
+                                        <span class="badge bg-light text-dark">Draft</span>
+                                    </t>
+                                    <t t-elif="app.state == 'submitted'">
+                                        <span class="badge bg-info text-white">Submitted</span>
+                                    </t>
+                                    <t t-elif="app.state == 'process'">
+                                        <span class="badge bg-warning text-dark">In Process</span>
+                                    </t>
+                                    <t t-elif="app.state == 'pending'">
+                                        <span class="badge bg-warning text-dark">⏳ Pending</span>
+                                    </t>
+                                    <t t-elif="app.state == 'done'">
+                                        <span class="badge bg-success">✅ Approved</span>
+                                    </t>
+                                    <t t-elif="app.state == 'declined'">
+                                        <span class="badge bg-danger">❌ Declined</span>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Applicant info -->
+                                <div class="row mb-4">
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted d-block">Applicant</small>
+                                        <strong t-esc="app.name"/>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted d-block">Email</small>
+                                        <span t-esc="app.email or 'N/A'"/>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted d-block">Phone</small>
+                                        <span t-esc="app.phone or 'N/A'"/>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted d-block">Business Type</small>
+                                        <span t-esc="app.business_type or 'N/A'"/>
+                                    </div>
+                                </div>
+
+                                <!-- Timeline steps -->
+                                <div class="position-relative ps-4 border-start border-2" style="border-color:#dee2e6 !important;">
+
+                                    <!-- Draft / Created -->
+                                    <div class="mb-3 position-relative">
+                                        <span class="position-absolute"
+                                              style="left:-21px;top:2px;width:16px;height:16px;border-radius:50%;background:#1565c0;border:3px solid #fff;box-shadow:0 0 0 2px #1565c0;"/>
+                                        <div class="ms-2">
+                                            <div class="fw-semibold small">Application Created</div>
+                                            <small class="text-muted">
+                                                <t t-if="app.drafted_on">
+                                                    <t t-esc="app.drafted_on.strftime('%d %b %Y, %H:%M')"/>
+                                                </t>
+                                                <t t-else="">—</t>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submitted -->
+                                    <div class="mb-3 position-relative">
+                                        <span class="position-absolute"
+                                              t-att-style="'left:-21px;top:2px;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px ' + ('#1565c0' if app.submitted_on else '#dee2e6') + ';background:' + ('#1565c0' if app.submitted_on else '#dee2e6') + ';'"/>
+                                        <div class="ms-2">
+                                            <div class="fw-semibold small" t-att-style="'' if app.submitted_on else 'color:#aaa'">Submitted</div>
+                                            <small class="text-muted">
+                                                <t t-if="app.submitted_on">
+                                                    <t t-esc="app.submitted_on.strftime('%d %b %Y, %H:%M')"/>
+                                                </t>
+                                                <t t-else="">Pending</t>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- In Process -->
+                                    <div class="mb-3 position-relative">
+                                        <span class="position-absolute"
+                                              t-att-style="'left:-21px;top:2px;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px ' + ('#1565c0' if app.processed_on else '#dee2e6') + ';background:' + ('#1565c0' if app.processed_on else '#dee2e6') + ';'"/>
+                                        <div class="ms-2">
+                                            <div class="fw-semibold small" t-att-style="'' if app.processed_on else 'color:#aaa'">Under Review</div>
+                                            <small class="text-muted">
+                                                <t t-if="app.processed_on">
+                                                    <t t-esc="app.processed_on.strftime('%d %b %Y, %H:%M')"/>
+                                                </t>
+                                                <t t-else="">Pending</t>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Approved / Declined -->
+                                    <div class="mb-3 position-relative">
+                                        <span class="position-absolute"
+                                              t-att-style="'left:-21px;top:2px;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px ' + ('#2e7d32' if app.state == 'done' else '#c62828' if app.state == 'declined' else '#dee2e6') + ';background:' + ('#2e7d32' if app.state == 'done' else '#c62828' if app.state == 'declined' else '#dee2e6') + ';'"/>
+                                        <div class="ms-2">
+                                            <t t-if="app.state == 'done'">
+                                                <div class="fw-semibold small text-success">✅ Approved</div>
+                                                <small class="text-muted">
+                                                    <t t-if="app.approved_on">
+                                                        <t t-esc="app.approved_on.strftime('%d %b %Y, %H:%M')"/>
+                                                    </t>
+                                                </small>
+                                            </t>
+                                            <t t-elif="app.state == 'declined'">
+                                                <div class="fw-semibold small text-danger">❌ Declined</div>
+                                                <small class="text-muted">
+                                                    <t t-if="app.declined_on">
+                                                        <t t-esc="app.declined_on.strftime('%d %b %Y, %H:%M')"/>
+                                                    </t>
+                                                </small>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="fw-semibold small" style="color:#aaa;">Decision Pending</div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Declined reason -->
+                                <t t-if="app.state == 'declined' and app.decline_reason">
+                                    <div class="alert alert-danger mt-3 mb-0" style="border-radius:8px;">
+                                        <strong>Reason:</strong> <t t-esc="app.decline_reason"/>
+                                    </div>
+                                </t>
+
+                                <!-- Approved: Go to profile -->
+                                <t t-if="app.state == 'done'">
+                                    <div class="alert alert-success mt-3 mb-0 text-center" style="border-radius:8px;">
+                                        🎉 Congratulations! Your portal access has been activated.
+                                        <div class="mt-2">
+                                            <a href="/dealer-profile" class="btn btn-success btn-sm">
+                                                <i class="fa fa-user me-1"/>Go to Dealer Profile
+                                            </a>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Message to admin -->
+                        <t t-if="app.state not in ('done', 'declined', 'draft')">
+                            <div class="card border-0 shadow-sm" style="border-radius:12px;">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa fa-comment me-2 text-primary"/>Send a Message to Our Team
+                                    </h6>
+                                    <form method="POST" action="/dealer/message">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="ref_code" t-att-value="app.ref_code"/>
+                                        <div class="mb-3">
+                                            <textarea name="message" class="form-control" rows="3"
+                                                      placeholder="Ask a question or provide additional information..."
+                                                      style="border-radius:8px;"/>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-paper-plane me-2"/>Send Message
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- No ref provided yet -->
+                    <t t-if="not app and not not_found and not ref_code">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa fa-inbox fa-3x mb-3 d-block opacity-25"/>
+                            <p>Enter your reference code above to check your application status.</p>
+                            <a href="/become-a-dealer" class="btn btn-outline-primary mt-2">Apply Now</a>
+                        </div>
+                    </t>
+
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- Not a dealer page -->
+<template id="template_not_a_dealer" name="Not a Dealer">
+    <t t-call="website.layout">
+        <t t-set="title">Dealer Access</t>
+        <div class="container py-5 text-center">
+            <div style="font-size:4rem;margin-bottom:16px;">🔒</div>
+            <h3 class="fw-bold mb-2">No Dealer Account Found</h3>
+            <p class="text-muted mb-4">
+                You are logged in as <strong t-esc="partner.name if partner else 'Unknown'"/>,
+                but no approved dealer application is linked to your account.
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/become-a-dealer" class="btn btn-primary">
+                    <i class="fa fa-edit me-2"/>Apply to Become a Dealer
+                </a>
+                <a href="/dealer-status" class="btn btn-outline-secondary">
+                    <i class="fa fa-search me-2"/>Track My Application
+                </a>
+            </div>
+        </div>
+    </t>
+</template>
+</odoo>

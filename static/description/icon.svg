@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="16" fill="#2c3e50"/>
-  <text x="50" y="68" font-size="58" text-anchor="middle" fill="#fff" font-family="Arial">🤝</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="16" fill="#1565c0"/>
+  <!-- Store/shop icon -->
+  <rect x="22" y="52" width="56" height="30" rx="3" fill="white" opacity="0.95"/>
+  <polygon points="15,52 50,22 85,52" fill="white" opacity="0.95"/>
+  <rect x="40" y="62" width="20" height="20" rx="2" fill="#1565c0"/>
+  <!-- Handshake hint: two small arcs -->
+  <path d="M30 40 Q50 30 70 40" stroke="white" stroke-width="3" fill="none" opacity="0.7"/>
 </svg>

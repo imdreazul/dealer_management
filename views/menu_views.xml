@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Root Menu ═══ -->
+    <menuitem id="menu_dealer_management_root"
+              name="Dealer Management"
+              web_icon="dealer_management,static/src/img/icon.png"
+              sequence="85"/>
+
+    <!-- ═══ Applications ═══ -->
+    <menuitem id="menu_dealer_applications"
+              name="Applications"
+              parent="menu_dealer_management_root"
+              sequence="10"/>
+
+    <menuitem id="menu_dealer_applications_pending"
+              name="Pending Applications"
+              parent="menu_dealer_applications"
+              action="action_dealership_application"
+              sequence="10"/>
+
+    <menuitem id="menu_dealer_applications_all"
+              name="All Applications"
+              parent="menu_dealer_applications"
+              action="action_dealership_application_all"
+              sequence="20"/>
+
+    <menuitem id="menu_dealer_applications_approved"
+              name="Active Dealers"
+              parent="menu_dealer_applications"
+              action="action_dealership_application_approved"
+              sequence="30"/>
+
+    <!-- ═══ Contracts ═══ -->
+    <menuitem id="menu_dealer_contracts"
+              name="Contracts"
+              parent="menu_dealer_management_root"
+              sequence="20"/>
+
+    <menuitem id="menu_dealer_contracts_list"
+              name="All Contracts"
+              parent="menu_dealer_contracts"
+              action="action_dealership_contract"
+              sequence="10"/>
+
+    <!-- ═══ Configuration (Manager only) ═══ -->
+    <menuitem id="menu_dealer_configuration"
+              name="Configuration"
+              parent="menu_dealer_management_root"
+              sequence="100"
+              groups="dealer_management.group_dealer_manager"/>
+
+</odoo>

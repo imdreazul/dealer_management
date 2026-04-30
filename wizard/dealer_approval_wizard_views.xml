@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Approval Wizard View -->
+    <record id="view_dealer_approval_wizard_form" model="ir.ui.view">
+        <field name="name">dealer.approval.wizard.form</field>
+        <field name="model">dealer.approval.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Application Decision">
+                <group>
+                    <field name="application_id" readonly="1"/>
+                    <field name="action"/>
+                    <field name="current_level" readonly="1"/>
+                    <field name="required_levels"
+                           groups="dealer_management.group_dealer_manager"/>
+                    <field name="reason"
+                           placeholder="Optional notes for approve; required for decline."
+                           required="action == 'decline'"/>
+                    <field name="send_email"/>
+                </group>
+                <footer>
+                    <button name="action_confirm"
+                            string="Confirm"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Contract Termination Wizard View -->
+    <record id="view_dealer_contract_termination_wizard_form" model="ir.ui.view">
+        <field name="name">dealer.contract.termination.wizard.form</field>
+        <field name="model">dealer.contract.termination.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Terminate Contract">
+                <group>
+                    <field name="contract_id" readonly="1"/>
+                    <field name="termination_date"/>
+                    <field name="reason" placeholder="Provide a reason for termination..."/>
+                </group>
+                <footer>
+                    <button name="action_terminate"
+                            string="Terminate Contract"
+                            type="object"
+                            class="btn-danger"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

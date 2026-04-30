@@ -1,4 +1,20 @@
-/* ═══════════════════════════════════════════
-   Dealer Management – Backend CSS
-═══════════════════════════════════════════ */
-.o_dealer_map_list .o_list_record_selector { display: none; }
+/* ================================================================
+   Dealer Management – Backend Styles (Odoo 17)
+   ================================================================ */
+
+/* ── Stat Buttons ──────────────────────────────────────────────── */
+.o_form_view .oe_stat_button.dealer-btn {
+    min-width: 80px;
+}
+
+/* ── Form header ───────────────────────────────────────────────── */
+.o_field_widget[name="state"] .o_statusbar_status button.o_arrow_button {
+    font-weight: 600;
+}
+
+/* ── Kanban card ───────────────────────────────────────────────── */
+.o_kanban_record .dealer-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+}

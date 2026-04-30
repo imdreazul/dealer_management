@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="template_find_dealer" name="Find a Dealer">
+    <t t-call="website.layout">
+        <t t-set="title">Find a Dealer</t>
+
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+        <!-- HERO BANNER -->
+        <div class="position-relative overflow-hidden"
+             style="background:linear-gradient(135deg,#0d1b4b 0%,#1565c0 55%,#0288d1 100%);min-height:220px;">
+            <div style="position:absolute;top:-50px;right:-50px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"/>
+            <div style="position:absolute;bottom:-60px;left:8%;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"/>
+            <div class="container py-5 position-relative" style="z-index:2;">
+                <div class="row align-items-center">
+                    <div class="col-lg-7 text-white">
+                        <div class="d-inline-block mb-3"
+                             style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 16px;font-size:0.8rem;letter-spacing:1px;">
+                            DEALER LOCATOR
+                        </div>
+                        <h1 class="display-5 fw-bold mb-2" style="text-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                            Find an Authorised Dealer
+                        </h1>
+                        <p class="mb-0" style="opacity:0.85;font-size:1.05rem;">
+                            Search our network of authorised dealers by location, city or name.
+                        </p>
+                    </div>
+                    <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+                        <div class="d-flex gap-3">
+                            <div class="text-center text-white">
+                                <div style="font-size:2rem;font-weight:bold;" t-esc="len(dealers)"/>
+                                <small style="opacity:0.75;">Active Dealers</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb -->
+        <div class="bg-light border-bottom py-2">
+            <div class="container">
+                <nav><ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Find a Dealer</li>
+                </ol></nav>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT: sidebar + map -->
+        <div style="display:flex;height:calc(100vh - 200px);min-height:500px;">
+
+            <!-- LEFT SIDEBAR -->
+            <div style="width:360px;min-width:300px;max-width:400px;display:flex;flex-direction:column;border-right:1px solid #dee2e6;background:#fff;"
+                 class="d-none d-lg-flex">
+
+                <!-- Search -->
+                <div class="p-3" style="background:#f8f9fa;border-bottom:1px solid #dee2e6;">
+                    <form method="GET" action="/find-a-dealer">
+                        <div class="mb-2">
+                            <input type="text" name="name" class="form-control form-control-sm"
+                                   placeholder="Search dealer name..."
+                                   t-att-value="search_name"/>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-7">
+                                <input type="text" name="city" class="form-control form-control-sm"
+                                       placeholder="City"
+                                       t-att-value="search_city"/>
+                            </div>
+                            <div class="col-5">
+                                <input type="text" name="postal" class="form-control form-control-sm"
+                                       placeholder="Postal/ZIP"
+                                       t-att-value="search_postal"/>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <select name="country" class="form-select form-select-sm">
+                                <option value="">All Countries</option>
+                                <t t-foreach="countries" t-as="c">
+                                    <option t-att-value="c.name"
+                                            t-att-selected="'selected' if c.name == search_country else None"
+                                            t-esc="c.name"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="fa fa-search me-1"/>Search
+                            </button>
+                            <a href="/find-a-dealer" class="btn btn-outline-secondary btn-sm">
+                                <i class="fa fa-times"/>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Count + locate me -->
+                <div class="px-3 py-2 d-flex justify-content-between align-items-center"
+                     style="border-bottom:1px solid #dee2e6;background:#fff;">
+                    <small class="text-muted fw-semibold">
+                        <i class="fa fa-map-marker me-1 text-primary"/>
+                        <t t-esc="len(dealers)"/> dealer(s) found
+                    </small>
+                    <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" id="locateMeBtn">
+                        <i class="fa fa-location-arrow me-1"/>My Location
+                    </button>
+                </div>
+
+                <!-- Dealer list -->
+                <div style="flex:1;overflow-y:auto;" id="dealerList">
+                    <t t-if="not dealers">
+                        <div class="text-center text-muted py-5 px-3">
+                            <i class="fa fa-map fa-3x mb-3 d-block" style="opacity:0.2;"/>
+                            <p class="mb-0 fw-semibold">No dealers found</p>
+                            <small>Try broadening your search.</small>
+                        </div>
+                    </t>
+                    <t t-foreach="dealers" t-as="dealer">
+                        <div class="dealer-list-card px-3 py-3"
+                             style="border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.15s;"
+                             t-att-data-id="dealer.id"
+                             t-att-onclick="'dealerMapFocusDealer(' + str(dealer.id) + ')'">
+                            <div class="d-flex gap-3 align-items-start">
+                                <t t-if="dealer.shop_image">
+                                    <img t-attf-src="/web/image/dealership.application/{{ dealer.id }}/shop_image/60x60"
+                                         style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;"/>
+                                </t>
+                                <t t-else="">
+                                    <div style="width:52px;height:52px;background:#e3f2fd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">
+                                        🏪
+                                    </div>
+                                </t>
+                                <div style="min-width:0;flex:1;">
+                                    <div class="fw-semibold text-truncate" t-esc="dealer.name"/>
+                                    <div class="text-muted small text-truncate">
+                                        <i class="fa fa-map-marker me-1"/>
+                                        <t t-esc="dealer.city_interested or ''"/>
+                                        <t t-if="dealer.country_interested_id">, <t t-esc="dealer.country_interested_id.name"/></t>
+                                    </div>
+                                    <t t-if="dealer.phone">
+                                        <div class="text-muted" style="font-size:0.78rem;">
+                                            <i class="fa fa-phone me-1"/><t t-esc="dealer.phone"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <i class="fa fa-chevron-right text-muted mt-1" style="font-size:0.75rem;"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- MAP -->
+            <div style="flex:1;position:relative;">
+                <div id="dealerMap" style="width:100%;height:100%;"/>
+
+                <!-- Mobile search toggle -->
+                <div class="d-lg-none position-absolute top-0 start-0 end-0 p-3" style="z-index:1000;">
+                    <button class="btn btn-primary w-100 shadow" data-bs-toggle="collapse"
+                            data-bs-target="#mobileSearch">
+                        <i class="fa fa-search me-2"/>Search Dealers
+                    </button>
+                    <div class="collapse mt-2" id="mobileSearch">
+                        <div class="card shadow border-0 p-3">
+                            <form method="GET" action="/find-a-dealer">
+                                <input type="text" name="name" class="form-control form-control-sm mb-2"
+                                       placeholder="Dealer name" t-att-value="search_name"/>
+                                <input type="text" name="city" class="form-control form-control-sm mb-2"
+                                       placeholder="City" t-att-value="search_city"/>
+                                <select name="country" class="form-select form-select-sm mb-2">
+                                    <option value="">All Countries</option>
+                                    <t t-foreach="countries" t-as="c">
+                                        <option t-att-value="c.name"
+                                                t-att-selected="'selected' if c.name == search_country else None"
+                                                t-esc="c.name"/>
+                                    </t>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Search</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEALER DETAIL DRAWER -->
+        <div id="dealerDrawer"
+             style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;pointer-events:none;">
+            <div id="dealerDrawerInner"
+                 style="background:#fff;max-width:480px;margin:0 auto;border-radius:16px 16px 0 0;padding:24px;box-shadow:0 -4px 32px rgba(0,0,0,0.18);pointer-events:all;transform:translateY(100%);transition:transform 0.3s ease;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold" id="drawerTitle">Dealer Details</h6>
+                    <button onclick="window.dealerMapCloseDrawer()"
+                            style="background:none;border:none;font-size:1.5rem;line-height:1;cursor:pointer;color:#999;">×</button>
+                </div>
+                <div id="drawerContent"/>
+            </div>
+        </div>
+        <div id="drawerBackdrop"
+             onclick="window.dealerMapCloseDrawer()"
+             style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9998;"/>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"/>
+
+        <!-- Leaflet JS (must load before dealer_map.js initialises) -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"/>
+        <!-- Inject server-side dealer data for dealer_map.js -->
+        <script type="text/javascript">
+            window.DEALER_MAP_DATA = <t t-out="dealers_json"/>;
+        </script>
+
+        <style>
+            .dealer-list-card:hover { background: #f0f7ff !important; }
+            #dealerMap .leaflet-popup-content { font-family: inherit; }
+            @media (max-width:991px) {
+                #dealerMap { height: 60vh; }
+            }
+        </style>
+    </t>
+</template>
+</odoo>

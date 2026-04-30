@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_dealer_application" model="ir.actions.report">
+        <field name="name">Dealer Application</field>
+        <field name="model">dealership.application</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dealer_management.report_dealer_application_document</field>
+        <field name="report_file">dealer_management.report_dealer_application_document</field>
+        <field name="print_report_name">'Dealer Application - %s' % (object.ref_code)</field>
+        <field name="binding_model_id" ref="dealer_management.model_dealership_application"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_dealer_application_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-8">
+                                <h2 class="text-primary">Dealer Application</h2>
+                                <h4 t-esc="o.name"/>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div><strong>Reference:</strong> <span t-esc="o.ref_code"/></div>
+                                <div><strong>Status:</strong>
+                                    <span t-esc="dict(o._fields['state'].selection).get(o.state, o.state)"/>
+                                </div>
+                                <div><strong>Submitted:</strong>
+                                    <span t-esc="o.submitted_on and o.submitted_on.strftime('%d/%m/%Y') or 'N/A'"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <!-- Personal Info -->
+                        <h5 class="text-primary">Personal Information</h5>
+                        <table class="table table-sm table-bordered mb-4">
+                            <tr>
+                                <td class="fw-bold" style="width:30%">Full Name</td>
+                                <td t-esc="o.name"/>
+                                <td class="fw-bold" style="width:30%">Date of Birth</td>
+                                <td t-esc="o.dob or 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Phone</td>
+                                <td t-esc="o.phone or 'N/A'"/>
+                                <td class="fw-bold">Email</td>
+                                <td t-esc="o.email or 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Secondary Phone</td>
+                                <td t-esc="o.secondary_phone or 'N/A'"/>
+                                <td class="fw-bold">Secondary Email</td>
+                                <td t-esc="o.secondary_email or 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Address</td>
+                                <td colspan="3">
+                                    <t t-esc="o.street or ''"/>
+                                    <t t-if="o.street2">, <t t-esc="o.street2"/></t>
+                                    <t t-if="o.home_city">, <t t-esc="o.home_city"/></t>
+                                    <t t-if="o.home_zip"> – <t t-esc="o.home_zip"/></t>
+                                    <t t-if="o.home_state_id">, <t t-esc="o.home_state_id.name"/></t>
+                                    <t t-if="o.home_country_id">, <t t-esc="o.home_country_id.name"/></t>
+                                    <t t-if="not o.street and not o.home_city and not o.home_country_id">N/A</t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Occupation</td>
+                                <td t-esc="o.current_occupation or 'N/A'"/>
+                                <td class="fw-bold">Qualification</td>
+                                <td t-esc="o.qualification or 'N/A'"/>
+                            </tr>
+                        </table>
+
+                        <!-- Business Details -->
+                        <h5 class="text-primary">Business Details</h5>
+                        <table class="table table-sm table-bordered mb-4">
+                            <tr>
+                                <td class="fw-bold" style="width:30%">Business Type</td>
+                                <td t-esc="dict(o._fields['business_type'].selection).get(o.business_type, 'N/A') if o.business_type else 'N/A'"/>
+                                <td class="fw-bold">Known Through</td>
+                                <td t-esc="dict(o._fields['vacancy_known_through'].selection).get(o.vacancy_known_through, 'N/A') if o.vacancy_known_through else 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Country Interested</td>
+                                <td t-esc="o.country_interested_id.name if o.country_interested_id else 'N/A'"/>
+                                <td class="fw-bold">State Interested</td>
+                                <td t-esc="o.state_interested_id.name if o.state_interested_id else 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">City Interested</td>
+                                <td t-esc="o.city_interested or 'N/A'"/>
+                                <td class="fw-bold">Total Area (Sq Ft)</td>
+                                <td t-esc="o.total_area"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Last Year Turnover</td>
+                                <td t-esc="'%.2f' % o.last_year_turnover"/>
+                                <td class="fw-bold">Investment Range</td>
+                                <td>
+                                    <span t-esc="'%.2f' % o.investment_from"/> –
+                                    <span t-esc="'%.2f' % o.investment_to"/>
+                                    <t t-if="o.investment_available"> (Available)</t>
+                                    <t t-elif="o.investment_not_available"> (Not Available)</t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Business Experience -->
+                        <t t-if="o.has_experience and o.experience_ids">
+                            <h5 class="text-primary">Business Experience</h5>
+                            <table class="table table-sm table-bordered mb-4">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Role</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.experience_ids" t-as="exp">
+                                        <tr>
+                                            <td t-esc="exp.company_name"/>
+                                            <td t-esc="exp.role or 'N/A'"/>
+                                            <td t-esc="exp.date_from"/>
+                                            <td t-esc="exp.date_to or 'Current'"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Enquiry -->
+                        <t t-if="o.enquiry_description">
+                            <h5 class="text-primary">Enquiry Description</h5>
+                            <p t-esc="o.enquiry_description"/>
+                        </t>
+
+                        <!-- Approval Dates -->
+                        <h5 class="text-primary">Workflow Timeline</h5>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <td class="fw-bold" style="width:25%">Drafted On</td>
+                                <td t-esc="o.drafted_on and o.drafted_on.strftime('%d/%m/%Y %H:%M') or 'N/A'"/>
+                                <td class="fw-bold" style="width:25%">Submitted On</td>
+                                <td t-esc="o.submitted_on and o.submitted_on.strftime('%d/%m/%Y %H:%M') or 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Processed On</td>
+                                <td t-esc="o.processed_on and o.processed_on.strftime('%d/%m/%Y %H:%M') or 'N/A'"/>
+                                <td class="fw-bold">Approved On</td>
+                                <td t-esc="o.approved_on and o.approved_on.strftime('%d/%m/%Y %H:%M') or 'N/A'"/>
+                            </tr>
+                            <t t-if="o.state == 'declined'">
+                                <tr>
+                                    <td class="fw-bold">Declined On</td>
+                                    <td t-esc="o.declined_on and o.declined_on.strftime('%d/%m/%Y %H:%M') or 'N/A'"/>
+                                    <td class="fw-bold">Reason</td>
+                                    <td t-esc="o.decline_reason or 'N/A'"/>
+                                </tr>
+                            </t>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Dealer Contract Report Action -->
+    <record id="action_report_dealer_contract" model="ir.actions.report">
+        <field name="name">Dealer Contract</field>
+        <field name="model">dealership.contract</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dealer_management.report_dealer_contract_document</field>
+        <field name="report_file">dealer_management.report_dealer_contract_document</field>
+        <field name="print_report_name">'Dealer Contract - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="dealer_management.model_dealership_contract"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Contract Report Template -->
+    <template id="report_dealer_contract_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="row mb-4">
+                            <div class="col-8">
+                                <h2 class="text-primary">Dealership Contract</h2>
+                                <h4 t-esc="o.name"/>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div><strong>Status:</strong>
+                                    <span t-esc="dict(o._fields['state'].selection).get(o.state, o.state)"/>
+                                </div>
+                                <div><strong>Created:</strong> <span t-esc="o.created_on"/></div>
+                            </div>
+                        </div>
+                        <hr/>
+
+                        <h5 class="text-primary">Dealer Details</h5>
+                        <table class="table table-sm table-bordered mb-4">
+                            <tr>
+                                <td class="fw-bold" style="width:30%">Dealer Name</td>
+                                <td t-esc="o.dealer_name"/>
+                                <td class="fw-bold">Application Ref</td>
+                                <td t-esc="o.application_id.ref_code if o.application_id else 'N/A'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Start Date</td>
+                                <td t-esc="o.start_date"/>
+                                <td class="fw-bold">End Date</td>
+                                <td t-esc="o.end_date or 'Ongoing'"/>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Sale Price Limit</td>
+                                <td t-esc="'%.2f' % o.sale_price_limit"/>
+                                <td class="fw-bold">Total Sales</td>
+                                <td t-esc="'%.2f' % o.total_sales"/>
+                            </tr>
+                            <t t-if="o.state == 'terminated'">
+                                <tr>
+                                    <td class="fw-bold">Termination Date</td>
+                                    <td t-esc="o.termination_date"/>
+                                    <td class="fw-bold">Reason</td>
+                                    <td t-esc="o.termination_reason or 'N/A'"/>
+                                </tr>
+                            </t>
+                        </table>
+
+                        <t t-if="o.contract_line_ids">
+                            <h5 class="text-primary">Sale Orders</h5>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sale Order</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Total Days</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.contract_line_ids" t-as="line">
+                                        <tr>
+                                            <td t-esc="line.sale_order_reference or 'N/A'"/>
+                                            <td t-esc="line.start_date or 'N/A'"/>
+                                            <td t-esc="line.end_date or 'N/A'"/>
+                                            <td t-esc="line.total_days"/>
+                                            <td t-esc="'%.2f' % line.amount_total"/>
+                                            <td t-esc="dict(line._fields['state'].selection).get(line.state, line.state)"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td colspan="4">Total</td>
+                                        <td t-esc="'%.2f' % o.total_sales"/>
+                                        <td/>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+
+                        <t t-if="o.notes">
+                            <h5 class="text-primary mt-3">Notes</h5>
+                            <p t-esc="o.notes"/>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

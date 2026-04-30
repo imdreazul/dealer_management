@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="template_dealer_profile" name="Dealer Profile">
+    <t t-call="website.layout">
+        <t t-set="title">Dealer Profile</t>
+
+        <!-- HERO BANNER -->
+        <div class="position-relative overflow-hidden"
+             style="background:linear-gradient(135deg,#0d3b1e 0%,#1b5e20 50%,#2e7d32 100%);min-height:220px;">
+            <div style="position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"/>
+            <div style="position:absolute;bottom:-60px;left:5%;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"/>
+            <div class="container py-5 position-relative" style="z-index:2;">
+                <div class="d-flex align-items-center gap-4">
+                    <!-- Shop image or avatar -->
+                    <t t-if="application.shop_image">
+                        <img t-attf-src="/web/image/dealership.application/{{ application.id }}/shop_image/100x100"
+                             style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:4px solid rgba(255,255,255,0.5);flex-shrink:0;"/>
+                    </t>
+                    <t t-else="">
+                        <div style="width:90px;height:90px;background:rgba(255,255,255,0.15);border-radius:50%;border:4px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;">
+                            🏪
+                        </div>
+                    </t>
+                    <div class="text-white">
+                        <div class="d-inline-block mb-2"
+                             style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 14px;font-size:0.78rem;letter-spacing:1px;">
+                            AUTHORISED DEALER
+                        </div>
+                        <h2 class="fw-bold mb-1" t-esc="application.name"/>
+                        <div style="color:rgba(255,255,255,0.75);font-size:0.9rem;" class="d-flex flex-wrap gap-3">
+                            <span>
+                                <i class="fa fa-ticket me-1"/>
+                                <t t-esc="application.ref_code"/>
+                            </span>
+                            <t t-if="application.city_interested">
+                                <span>
+                                    <i class="fa fa-map-marker me-1"/>
+                                    <t t-esc="application.city_interested"/>
+                                    <t t-if="application.country_interested_id">, <t t-esc="application.country_interested_id.name"/></t>
+                                </span>
+                            </t>
+                            <t t-if="application.approved_on">
+                                <span>
+                                    <i class="fa fa-calendar me-1"/>Dealer since
+                                    <t t-esc="application.approved_on.strftime('%b %Y')"/>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="ms-auto d-none d-md-block">
+                        <span class="badge fs-6 px-3 py-2" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:20px;">
+                            ✅ Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Breadcrumb -->
+        <div class="bg-light border-bottom py-2">
+            <div class="container">
+                <nav><ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Dealer Profile</li>
+                </ol></nav>
+            </div>
+        </div>
+
+        <div class="container py-5">
+
+            <!-- Alerts -->
+            <t t-if="success">
+                <div class="alert alert-success alert-dismissible fade show" style="border-radius:10px;">
+                    <i class="fa fa-check-circle me-2"/>Profile updated successfully.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                </div>
+            </t>
+            <t t-if="error.get('secondary_email')">
+                <div class="alert alert-danger" style="border-radius:10px;">
+                    <i class="fa fa-exclamation-circle me-2"/>
+                    <t t-esc="error['secondary_email']"/>
+                </div>
+            </t>
+
+            <div class="row g-4">
+
+                <!-- ── LEFT: Profile Card + Edit ── -->
+                <div class="col-lg-4">
+
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-3 text-muted text-uppercase small letter-spacing-1">
+                                Contact Information
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="py-2 border-bottom d-flex align-items-start gap-3">
+                                    <i class="fa fa-phone text-primary mt-1" style="width:16px;"/>
+                                    <div>
+                                        <small class="text-muted d-block">Phone</small>
+                                        <span class="fw-semibold" t-esc="application.phone or '—'"/>
+                                    </div>
+                                </li>
+                                <li class="py-2 border-bottom d-flex align-items-start gap-3">
+                                    <i class="fa fa-envelope text-primary mt-1" style="width:16px;"/>
+                                    <div>
+                                        <small class="text-muted d-block">Email</small>
+                                        <span class="fw-semibold" t-esc="application.email or '—'"/>
+                                    </div>
+                                </li>
+                                <t t-if="application.secondary_phone">
+                                    <li class="py-2 border-bottom d-flex align-items-start gap-3">
+                                        <i class="fa fa-mobile text-primary mt-1" style="width:16px;"/>
+                                        <div>
+                                            <small class="text-muted d-block">Secondary Phone</small>
+                                            <span t-esc="application.secondary_phone"/>
+                                        </div>
+                                    </li>
+                                </t>
+                                <t t-if="application.secondary_email">
+                                    <li class="py-2 border-bottom d-flex align-items-start gap-3">
+                                        <i class="fa fa-envelope-o text-primary mt-1" style="width:16px;"/>
+                                        <div>
+                                            <small class="text-muted d-block">Secondary Email</small>
+                                            <span t-esc="application.secondary_email"/>
+                                        </div>
+                                    </li>
+                                </t>
+                                <li class="py-2 d-flex align-items-start gap-3">
+                                    <i class="fa fa-map-marker text-primary mt-1" style="width:16px;"/>
+                                    <div>
+                                        <small class="text-muted d-block">Location Interest</small>
+                                        <span>
+                                            <t t-if="application.city_interested"><t t-esc="application.city_interested"/>, </t>
+                                            <t t-if="application.country_interested_id"><t t-esc="application.country_interested_id.name"/></t>
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Edit form -->
+                    <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                            <h6 class="fw-bold mb-0">
+                                <i class="fa fa-pencil me-2 text-primary"/>Edit Contact Details
+                            </h6>
+                            <small class="text-muted">Update your phone or secondary contact info.</small>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="POST" action="/dealer-profile/update">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Phone</label>
+                                    <input type="tel" name="phone" class="form-control form-control-sm"
+                                           t-att-value="application.phone or ''"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Secondary Phone</label>
+                                    <input type="tel" name="secondary_phone" class="form-control form-control-sm"
+                                           t-att-value="application.secondary_phone or ''"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Secondary Email</label>
+                                    <input type="email" name="secondary_email" class="form-control form-control-sm"
+                                           t-att-class="'form-control form-control-sm is-invalid' if error.get('secondary_email') else 'form-control form-control-sm'"
+                                           t-att-value="application.secondary_email or ''"/>
+                                    <t t-if="error.get('secondary_email')">
+                                        <div class="invalid-feedback" t-esc="error['secondary_email']"/>
+                                    </t>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm w-100" style="border-radius:8px;">
+                                    <i class="fa fa-save me-1"/>Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── RIGHT: Tabs ── -->
+                <div class="col-lg-8">
+                    <ul class="nav nav-pills mb-3 gap-2" id="dealerTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#ordersPane" type="button">
+                                <i class="fa fa-shopping-cart me-1"/>Orders
+                                <span class="badge bg-secondary ms-1"><t t-esc="len(sale_orders)"/></span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#leadsPane" type="button">
+                                <i class="fa fa-phone me-1"/>Leads
+                                <span class="badge bg-secondary ms-1"><t t-esc="len(leads)"/></span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#contractsPane" type="button">
+                                <i class="fa fa-file-text me-1"/>Contracts
+                                <span class="badge bg-secondary ms-1"><t t-esc="len(contracts)"/></span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        <!-- Orders -->
+                        <div class="tab-pane fade show active" id="ordersPane">
+                            <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
+                                <t t-if="not sale_orders">
+                                    <div class="p-5 text-center text-muted">
+                                        <i class="fa fa-shopping-cart fa-2x mb-3 d-block opacity-25"/>
+                                        No sale orders linked yet.
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="px-4 py-3 fw-semibold small">Order #</th>
+                                                    <th class="py-3 fw-semibold small">Date</th>
+                                                    <th class="py-3 fw-semibold small">Products</th>
+                                                    <th class="py-3 fw-semibold small">Total</th>
+                                                    <th class="py-3 fw-semibold small">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="sale_orders" t-as="order">
+                                                    <tr>
+                                                        <td class="px-4 fw-semibold" t-esc="order.name"/>
+                                                        <td>
+                                                            <t t-if="order.date_order">
+                                                                <t t-esc="order.date_order.strftime('%d %b %Y')"/>
+                                                            </t>
+                                                        </td>
+                                                        <td>
+                                                            <t t-foreach="order.order_line[:2]" t-as="line">
+                                                                <span class="badge bg-light text-dark border me-1 small" t-esc="line.product_id.name"/>
+                                                            </t>
+                                                            <t t-if="len(order.order_line) > 2">
+                                                                <span class="text-muted small">+<t t-esc="len(order.order_line) - 2"/> more</span>
+                                                            </t>
+                                                        </td>
+                                                        <td class="fw-semibold">
+                                                            <t t-esc="'%.2f' % order.amount_total"/>
+                                                            <small class="text-muted ms-1" t-esc="order.currency_id.symbol"/>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="order.state == 'sale'"><span class="badge bg-success">Confirmed</span></t>
+                                                            <t t-elif="order.state == 'done'"><span class="badge bg-primary">Locked</span></t>
+                                                            <t t-elif="order.state == 'cancel'"><span class="badge bg-danger">Cancelled</span></t>
+                                                            <t t-elif="order.state == 'sent'"><span class="badge bg-info">Sent</span></t>
+                                                            <t t-else=""><span class="badge bg-light text-dark" t-esc="order.state"/></t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Leads -->
+                        <div class="tab-pane fade" id="leadsPane">
+                            <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
+                                <t t-if="not leads">
+                                    <div class="p-5 text-center text-muted">
+                                        <i class="fa fa-phone fa-2x mb-3 d-block opacity-25"/>
+                                        No leads linked yet.
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="px-4 py-3 fw-semibold small">Lead</th>
+                                                    <th class="py-3 fw-semibold small">Contact</th>
+                                                    <th class="py-3 fw-semibold small">Expected Revenue</th>
+                                                    <th class="py-3 fw-semibold small">Stage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="leads" t-as="lead">
+                                                    <tr>
+                                                        <td class="px-4 fw-semibold" t-esc="lead.name"/>
+                                                        <td t-esc="lead.partner_name or '—'"/>
+                                                        <td>
+                                                            <t t-esc="'%.2f' % lead.expected_revenue"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-light text-dark border"
+                                                                  t-esc="lead.stage_id.name if lead.stage_id else '—'"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Contracts -->
+                        <div class="tab-pane fade" id="contractsPane">
+                            <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
+                                <t t-if="not contracts">
+                                    <div class="p-5 text-center text-muted">
+                                        <i class="fa fa-file-text fa-2x mb-3 d-block opacity-25"/>
+                                        No contracts found.
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead style="background:#f8f9fa;">
+                                                <tr>
+                                                    <th class="px-4 py-3 fw-semibold small">Contract</th>
+                                                    <th class="py-3 fw-semibold small">Start</th>
+                                                    <th class="py-3 fw-semibold small">End</th>
+                                                    <th class="py-3 fw-semibold small">Total Sales</th>
+                                                    <th class="py-3 fw-semibold small">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="contracts" t-as="contract">
+                                                    <tr>
+                                                        <td class="px-4 fw-semibold" t-esc="contract.name"/>
+                                                        <td t-esc="contract.start_date or '—'"/>
+                                                        <td t-esc="contract.end_date or 'Ongoing'"/>
+                                                        <td>
+                                                            <t t-esc="'%.2f' % contract.total_sales"/>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="contract.state == 'active'"><span class="badge bg-success">Active</span></t>
+                                                            <t t-elif="contract.state == 'expired'"><span class="badge bg-secondary">Expired</span></t>
+                                                            <t t-elif="contract.state == 'terminated'"><span class="badge bg-danger">Terminated</span></t>
+                                                            <t t-else=""><span class="badge bg-warning text-dark" t-esc="contract.state"/></t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+</odoo>

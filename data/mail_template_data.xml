@@ -1,136 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. Submission Confirmation -->
-    <record id="email_template_dealer_submission" model="mail.template">
-        <field name="name">Dealer Application: Submission Confirmation</field>
-        <field name="model_id" ref="model_dealer_application"/>
-        <field name="subject">Your Dealer Application Received – Ref: {{ object.ref_code }}</field>
-        <field name="email_to">{{ object.email }}</field>
-        <field name="email_from">{{ (user.email_formatted or user.company_id.email) }}</field>
-        <field name="body_html"><![CDATA[
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-  <div style="background:#2c3e50;padding:24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:22px;">Dealer Application Received</h1>
-  </div>
-  <div style="padding:32px;">
-    <p>Dear <strong>{{ object.name }}</strong>,</p>
-    <p>Thank you for applying to become a dealer. We have received your application successfully.</p>
-    <div style="background:#f8f9fa;border-left:4px solid #2c3e50;padding:16px;margin:20px 0;border-radius:4px;">
-      <p style="margin:0 0 8px;"><strong>Reference Code:</strong> <span style="font-size:20px;color:#2c3e50;font-weight:bold;">{{ object.ref_code }}</span></p>
-      <p style="margin:0;"><strong>Plan Requested:</strong> {{ object.plan_id.name }}</p>
-    </div>
-    <p>You can track your application status at any time using the button below:</p>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="{{ object.get_status_url() }}"
-         style="background:#2c3e50;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">
-         Track My Application
-      </a>
-    </div>
-    <p style="color:#666;font-size:13px;">Our team will review your application and get back to you within 2-3 business days.</p>
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
-    <p style="color:#999;font-size:12px;margin:0;">If you did not submit this application, please ignore this email.</p>
-  </div>
-</div>
-        ]]></field>
-        <field name="auto_delete" eval="True"/>
-    </record>
+    <data noupdate="1">
 
-    <!-- 2. Proposal Sent -->
-    <record id="email_template_dealer_proposal" model="mail.template">
-        <field name="name">Dealer Application: Proposal / Sale Order Sent</field>
-        <field name="model_id" ref="model_dealer_application"/>
-        <field name="subject">Your Dealer Proposal is Ready – Ref: {{ object.ref_code }}</field>
-        <field name="email_to">{{ object.email }}</field>
-        <field name="email_from">{{ (user.email_formatted or user.company_id.email) }}</field>
-        <field name="body_html"><![CDATA[
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-  <div style="background:#27ae60;padding:24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:22px;">Dealer Proposal Ready</h1>
-  </div>
-  <div style="padding:32px;">
-    <p>Dear <strong>{{ object.name }}</strong>,</p>
-    <p>Great news! We have reviewed your application <strong>{{ object.ref_code }}</strong> and sent you a formal proposal.</p>
-    {% if object.sale_order_id %}
-    <div style="background:#f0faf4;border-left:4px solid #27ae60;padding:16px;margin:20px 0;border-radius:4px;">
-      <p style="margin:0 0 6px;"><strong>Sale Order:</strong> {{ object.sale_order_id.name }}</p>
-      <p style="margin:0 0 6px;"><strong>Amount:</strong> {{ object.sale_order_id.amount_total }} {{ object.sale_order_id.currency_id.name }}</p>
-      <p style="margin:0;"><strong>Plan:</strong> {{ object.plan_id.name }}</p>
+        <record id="mail_template_application_submitted" model="mail.template">
+            <field name="name">Dealer Application: Submitted</field>
+            <field name="model_id" ref="dealer_management.model_dealership_application"/>
+            <field name="subject">Your Dealer Application [{{ object.ref_code }}] Has Been Received</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted) }}</field>
+            <field name="body_html" type="html">
+<div style="margin:0px;padding:0px;font-family:Arial,sans-serif;">
+    <div style="background:#1a73e8;padding:20px 30px;">
+        <h2 style="color:#fff;margin:0;">Dealer Application Received</h2>
     </div>
-    {% endif %}
-    <p>To proceed with your dealership, please confirm the order and complete the payment and delivery process.</p>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="{{ object.get_status_url() }}"
-         style="background:#27ae60;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">
-         View Application Status
-      </a>
+    <div style="padding:20px 30px;background:#f9f9f9;">
+        <p>Dear <strong><t t-out="object.name or ''"/></strong>,</p>
+        <p>Thank you for submitting your dealer application. We have received your request and our team will review it shortly.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><strong>Reference Code</strong></td>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><t t-out="object.ref_code or ''"/></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><strong>Submitted On</strong></td>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><t t-out="object.submitted_on or ''"/></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><strong>Status</strong></td>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;">Submitted – Under Review</td>
+            </tr>
+        </table>
+        <p>You can track your application status using your reference code: <strong><t t-out="object.ref_code or ''"/></strong></p>
+        <p style="margin-top:20px;">
+            <a t-attf-href="{{ object.get_base_url() }}/dealer-status/{{ object.ref_code }}"
+               style="background:#1a73e8;color:#fff;padding:10px 24px;text-decoration:none;border-radius:4px;">
+                Track Application
+            </a>
+        </p>
+        <hr/>
+        <p style="color:#888;font-size:12px;">If you have questions you can reply to this email.</p>
     </div>
-    <p style="color:#666;font-size:13px;">Once payment and delivery are confirmed, your dealer account will be activated.</p>
-  </div>
 </div>
-        ]]></field>
-        <field name="auto_delete" eval="True"/>
-    </record>
+            </field>
+        </record>
 
-    <!-- 3. Approved -->
-    <record id="email_template_dealer_approved" model="mail.template">
-        <field name="name">Dealer Application: Approved – Portal Access</field>
-        <field name="model_id" ref="model_dealer_application"/>
-        <field name="subject">Congratulations! You are Now a Dealer – {{ object.ref_code }}</field>
-        <field name="email_to">{{ object.email }}</field>
-        <field name="email_from">{{ (user.email_formatted or user.company_id.email) }}</field>
-        <field name="body_html"><![CDATA[
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-  <div style="background:#f39c12;padding:24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:24px;">🎉 Welcome, Dealer!</h1>
-  </div>
-  <div style="padding:32px;">
-    <p>Dear <strong>{{ object.name }}</strong>,</p>
-    <p>Congratulations! Your dealer application <strong>{{ object.ref_code }}</strong> has been <strong>approved</strong>. You are now an official dealer!</p>
-    <div style="background:#fffbf0;border-left:4px solid #f39c12;padding:16px;margin:20px 0;border-radius:4px;">
-      <p style="margin:0 0 6px;"><strong>Business:</strong> {{ object.company_name }}</p>
-      <p style="margin:0 0 6px;"><strong>Plan:</strong> {{ object.plan_id.name }}</p>
-      <p style="margin:0;"><strong>Location:</strong> {{ object.city }}{% if object.country_id %}, {{ object.country_id.name }}{% endif %}</p>
+        <record id="mail_template_application_pending" model="mail.template">
+            <field name="name">Dealer Application: Pending – More Info Required</field>
+            <field name="model_id" ref="dealer_management.model_dealership_application"/>
+            <field name="subject">Action Required: Your Dealer Application [{{ object.ref_code }}]</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted) }}</field>
+            <field name="body_html" type="html">
+<div style="margin:0px;padding:0px;font-family:Arial,sans-serif;">
+    <div style="background:#f9a825;padding:20px 30px;">
+        <h2 style="color:#fff;margin:0;">Additional Information Required</h2>
     </div>
-    <p>Your dealer portal is now active. Use your registered email to log in and access your dealer dashboard.</p>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="/my/dealer/dashboard"
-         style="background:#f39c12;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">
-         Go to Dealer Dashboard
-      </a>
+    <div style="padding:20px 30px;background:#f9f9f9;">
+        <p>Dear <strong><t t-out="object.name or ''"/></strong>,</p>
+        <p>Your dealer application <strong><t t-out="object.ref_code or ''"/></strong> is currently on hold. Our team requires additional information before we can proceed.</p>
+        <p>Please log in to your account or reply to this email with the requested information.</p>
+        <p style="margin-top:20px;">
+            <a t-attf-href="{{ object.get_base_url() }}/dealer-status/{{ object.ref_code }}"
+               style="background:#f9a825;color:#fff;padding:10px 24px;text-decoration:none;border-radius:4px;">
+                View Application
+            </a>
+        </p>
     </div>
-    <p style="color:#666;font-size:13px;">From your dashboard you can manage your profile, view orders, track leads, and more.</p>
-  </div>
 </div>
-        ]]></field>
-        <field name="auto_delete" eval="True"/>
-    </record>
+            </field>
+        </record>
 
-    <!-- 4. Rejected -->
-    <record id="email_template_dealer_rejected" model="mail.template">
-        <field name="name">Dealer Application: Rejected</field>
-        <field name="model_id" ref="model_dealer_application"/>
-        <field name="subject">Update on Your Dealer Application – {{ object.ref_code }}</field>
-        <field name="email_to">{{ object.email }}</field>
-        <field name="email_from">{{ (user.email_formatted or user.company_id.email) }}</field>
-        <field name="body_html"><![CDATA[
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-  <div style="background:#e74c3c;padding:24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:22px;">Application Update</h1>
-  </div>
-  <div style="padding:32px;">
-    <p>Dear <strong>{{ object.name }}</strong>,</p>
-    <p>Thank you for your interest in becoming a dealer. After careful review, we are unable to approve your application <strong>{{ object.ref_code }}</strong> at this time.</p>
-    {% if object.rejection_reason %}
-    <div style="background:#fdf3f2;border-left:4px solid #e74c3c;padding:16px;margin:20px 0;border-radius:4px;">
-      <p style="margin:0;"><strong>Reason:</strong> {{ object.rejection_reason }}</p>
+        <record id="mail_template_application_approved" model="mail.template">
+            <field name="name">Dealer Application: Approved – Welcome!</field>
+            <field name="model_id" ref="dealer_management.model_dealership_application"/>
+            <field name="subject">Congratulations! Your Dealer Application [{{ object.ref_code }}] is Approved</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted) }}</field>
+            <field name="body_html" type="html">
+<div style="margin:0px;padding:0px;font-family:Arial,sans-serif;">
+    <div style="background:#2e7d32;padding:20px 30px;">
+        <h2 style="color:#fff;margin:0;">🎉 Welcome to Our Dealer Network!</h2>
     </div>
-    {% endif %}
-    <p>You are welcome to re-apply after addressing the above concerns. If you have any questions, please contact our support team.</p>
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
-    <p style="color:#999;font-size:12px;">Reference: {{ object.ref_code }}</p>
-  </div>
+    <div style="padding:20px 30px;background:#f9f9f9;">
+        <p>Dear <strong><t t-out="object.name or ''"/></strong>,</p>
+        <p>We are thrilled to inform you that your dealer application has been <strong>approved</strong>. You are now an official dealer!</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><strong>Dealer Reference</strong></td>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><t t-out="object.ref_code or ''"/></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><strong>Approved On</strong></td>
+                <td style="padding:8px;border:1px solid #ddd;background:#fff;"><t t-out="object.approved_on or ''"/></td>
+            </tr>
+        </table>
+        <p>You can now access your <strong>Dealer Profile</strong> on our website using your registered email.</p>
+        <p style="margin-top:20px;">
+            <a t-attf-href="{{ object.get_base_url() }}/dealer-profile"
+               style="background:#2e7d32;color:#fff;padding:10px 24px;text-decoration:none;border-radius:4px;">
+                Go to Dealer Profile
+            </a>
+        </p>
+        <hr/>
+        <p style="color:#888;font-size:12px;">Your dealer reference code is: <strong><t t-out="object.ref_code or ''"/></strong>. Keep this for your records.</p>
+    </div>
 </div>
-        ]]></field>
-        <field name="auto_delete" eval="True"/>
-    </record>
+            </field>
+        </record>
+
+        <record id="mail_template_application_declined" model="mail.template">
+            <field name="name">Dealer Application: Declined</field>
+            <field name="model_id" ref="dealer_management.model_dealership_application"/>
+            <field name="subject">Update on Your Dealer Application [{{ object.ref_code }}]</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted) }}</field>
+            <field name="body_html" type="html">
+<div style="margin:0px;padding:0px;font-family:Arial,sans-serif;">
+    <div style="background:#c62828;padding:20px 30px;">
+        <h2 style="color:#fff;margin:0;">Application Status Update</h2>
+    </div>
+    <div style="padding:20px 30px;background:#f9f9f9;">
+        <p>Dear <strong><t t-out="object.name or ''"/></strong>,</p>
+        <p>We regret to inform you that your dealer application <strong><t t-out="object.ref_code or ''"/></strong> has not been approved at this time.</p>
+
+        <t t-if="object.decline_reason">
+            <p><strong>Reason:</strong> <t t-out="object.decline_reason"/></p>
+        </t>
+
+        <p>We encourage you to re-apply in the future. If you believe this decision was made in error, please contact us.</p>
+        <p style="color:#888;font-size:12px;">Thank you for your interest in joining our dealer network.</p>
+    </div>
+</div>
+            </field>
+        </record>
+
+    </data>
 </odoo>

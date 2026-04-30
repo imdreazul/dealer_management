@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════
+         FORM VIEW
+    ═══════════════════════════════════════════════════ -->
+    <record id="view_dealership_application_form" model="ir.ui.view">
+        <field name="name">dealership.application.form</field>
+        <field name="model">dealership.application</field>
+        <field name="arch" type="xml">
+            <form string="Dealer Application">
+                <header>
+                    <!-- Action Buttons -->
+                    <button name="action_submit"
+                            string="Submit Application"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_process"
+                            string="Start Processing"
+                            type="object"
+                            class="btn-primary"
+                            groups="dealer_management.group_dealer_manager"
+                            invisible="state not in ('submitted', 'pending')"/>
+                    <button name="action_pending"
+                            string="Mark as Pending"
+                            type="object"
+                            groups="dealer_management.group_dealer_manager"
+                            invisible="state != 'process'"/>
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-success"
+                            groups="dealer_management.group_dealer_manager"
+                            invisible="state not in ('process', 'submitted')"/>
+                    <button name="action_decline"
+                            string="Decline"
+                            type="object"
+                            class="btn-danger"
+                            groups="dealer_management.group_dealer_manager"
+                            invisible="state in ('declined', 'done', 'draft')"/>
+                    <button name="action_reset_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            groups="dealer_management.group_dealer_manager"
+                            invisible="state != 'declined'"/>
+
+                    <!-- Status Bar -->
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,submitted,process,done"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+<!--                        <button name="action_view_sale_orders"-->
+<!--                                type="object"-->
+<!--                                class="oe_stat_button"-->
+<!--                                icon="fa-shopping-cart"-->
+<!--                                invisible="portal_access_granted"-->
+<!--                                groups="dealer_management.group_dealer_manager">-->
+<!--                            <field name="sale_order_count" widget="statinfo" string="Orders"/>-->
+<!--                        </button>-->
+                        <button name="action_view_sale_orders"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-shopping-cart"
+                                groups="dealer_management.group_dealer_manager">
+                            <field name="sale_order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="action_view_leads"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-phone"
+                                invisible="lead_count == 0">
+                            <field name="lead_count" widget="statinfo" string="Leads"/>
+                        </button>
+                        <button name="action_view_contracts"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o">
+                            <field name="contract_count" widget="statinfo" string="Contracts"/>
+                        </button>
+<!--                        <button name="action_view_sale_orders"-->
+<!--                                type="object"-->
+<!--                                class="oe_stat_button"-->
+<!--                                icon="fa-globe"-->
+<!--                                invisible="portal_access_granted"-->
+<!--                                groups="dealer_management.group_dealer_manager">-->
+<!--                            <span class="o_stat_text">Portal Active</span>-->
+<!--                        </button>-->
+                    </div>
+
+                    <!-- Shop Image -->
+                    <field name="shop_image"
+                           widget="image"
+                           class="oe_avatar"
+                           options="{'preview_image': 'shop_image'}"/>
+
+                    <div class="oe_title">
+                        <label for="name" string="Applicant Name"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="Full Name"
+                                   readonly="state == 'done'"/>
+                        </h1>
+                        <div>
+                            <field name="ref_code"
+                                   class="oe_read_only"
+                                   readonly="1"/>
+                        </div>
+                    </div>
+
+                    <notebook>
+                        <!-- ── Tab 1: Personal Info ─────────────────── -->
+                        <page string="Personal Information" name="personal_info">
+                            <group>
+                                <group string="Basic Details">
+                                    <field name="dob"/>
+                                    <field name="phone"/>
+                                    <field name="email"/>
+                                    <field name="secondary_phone"/>
+                                    <field name="secondary_email"/>
+                                </group>
+                                <group string="Home Address">
+                                    <field name="street"/>
+                                    <field name="street2"/>
+                                    <field name="home_country_id"/>
+                                    <field name="home_state_id"/>
+                                    <field name="home_city"/>
+                                    <field name="home_zip"/>
+                                </group>
+                            </group>
+                            <group string="Professional Background">
+                                <group>
+                                    <field name="current_occupation"/>
+                                    <field name="qualification"/>
+                                    <field name="vacancy_known_through"/>
+                                </group>
+                                <group>
+                                    <field name="code"/>
+                                    <field name="business_type"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ── Tab 2: Business Details ─────────────── -->
+                        <page string="Business Interest" name="business_interest">
+                            <group string="Location of Interest">
+                                <group>
+                                    <field name="country_interested_id"/>
+                                    <field name="state_interested_id"/>
+                                    <field name="city_interested"/>
+                                </group>
+                            </group>
+                            <group string="Business Experience">
+                                <field name="has_experience" colspan="2"/>
+                                <field name="experience_ids"
+                                       colspan="2"
+                                       nolabel="1"
+                                       invisible="not has_experience">
+                                    <tree editable="bottom">
+                                        <field name="company_name"/>
+                                        <field name="role"/>
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+                                        <field name="is_current"/>
+                                        <field name="description" optional="hide"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group string="Financial Information">
+                                <group>
+                                    <field name="last_year_turnover" widget="monetary"/>
+                                    <field name="total_area"/>
+                                </group>
+                                <group string="Dealer Investment Range">
+                                    <field name="investment_from" widget="monetary"/>
+                                    <field name="investment_to" widget="monetary"/>
+                                    <field name="investment_available"/>
+                                    <field name="investment_not_available"/>
+                                </group>
+                            </group>
+                            <group string="Enquiry">
+                                <field name="enquiry_description" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+
+                        <!-- ── Tab 3: Attachments ──────────────────── -->
+                        <page string="Attachments" name="attachments">
+                            <group>
+                                <group string="Shop Image">
+                                    <field name="shop_image"
+                                           widget="image"
+                                           nolabel="1"
+                                           colspan="2"
+                                           options="{'size': [300, 200]}"/>
+                                    <field name="shop_image_filename" invisible="1"/>
+                                </group>
+                            </group>
+                            <separator string="Documents"/>
+                            <field name="document_ids"
+                                   widget="many2many_binary"
+                                   nolabel="1"
+                                   colspan="2"/>
+                        </page>
+
+                        <!-- ── Tab 4: Sale Orders ──────────────────── -->
+                        <page string="Sale Orders" name="sale_orders">
+                            <field name="sale_order_ids" nolabel="1" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date_order"/>
+                                    <field name="partner_id"/>
+                                    <field name="amount_total" widget="monetary"/>
+                                    <field name="state"/>
+                                    <field name="is_dealer_qualifying_order"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab 5: Leads ────────────────────────── -->
+                        <page string="Leads &amp; Opportunities" name="leads">
+                            <field name="lead_ids" nolabel="1" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_name"/>
+                                    <field name="expected_revenue" widget="monetary"/>
+                                    <field name="stage_id"/>
+                                    <field name="user_id"/>
+                                    <field name="date_deadline"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab 6: Contracts ────────────────────── -->
+                        <page string="Contracts" name="contracts">
+                            <field name="contract_ids" nolabel="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="sale_price_limit" widget="monetary"/>
+                                    <field name="total_sales" widget="monetary"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab 7: Approval Info ────────────────── -->
+                        <page string="Approval &amp; Dates" name="approval_info"
+                              groups="dealer_management.group_dealer_manager">
+                            <group>
+                                <group string="Dates">
+                                    <field name="drafted_on"/>
+                                    <field name="submitted_on"/>
+                                    <field name="processed_on"/>
+                                    <field name="approved_on"/>
+                                    <field name="declined_on" invisible="state != 'declined'"/>
+                                </group>
+                                <group string="Approval Details">
+                                    <field name="approval_level"/>
+                                    <field name="approved_by_ids" widget="many2many_tags"/>
+                                    <field name="portal_access_granted"/>
+                                    <field name="website_published"/>
+                                    <field name="partner_id"/>
+                                </group>
+                            </group>
+                            <group string="Decline Reason" invisible="state != 'declined'">
+                                <field name="decline_reason" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+
+                    </notebook>
+                </sheet>
+
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════
+         TREE / LIST VIEW
+    ═══════════════════════════════════════════════════ -->
+    <record id="view_dealership_application_tree" model="ir.ui.view">
+        <field name="name">dealership.application.tree</field>
+        <field name="model">dealership.application</field>
+        <field name="arch" type="xml">
+            <tree string="Dealer Applications" decoration-success="state == 'done'"
+                  decoration-danger="state == 'declined'"
+                  decoration-warning="state == 'pending'"
+                  decoration-info="state == 'process'">
+                <field name="ref_code"/>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="business_type"/>
+                <field name="city_interested"/>
+                <field name="country_interested_id"/>
+                <field name="submitted_on"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'declined'"
+                       decoration-warning="state == 'pending'"
+                       decoration-info="state in ('process', 'submitted')"/>
+                <field name="portal_access_granted" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════
+         KANBAN VIEW
+    ═══════════════════════════════════════════════════ -->
+    <record id="view_dealership_application_kanban" model="ir.ui.view">
+        <field name="name">dealership.application.kanban</field>
+        <field name="model">dealership.application</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="ref_code"/>
+                <field name="state"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="city_interested"/>
+                <field name="submitted_on"/>
+                <field name="shop_image"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <div class="d-flex align-items-center">
+                                    <div t-if="record.shop_image.raw_value" class="me-2">
+                                        <img t-att-src="kanban_image('dealership.application', 'shop_image', record.id.raw_value)"
+                                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;"/>
+                                    </div>
+                                    <div>
+                                        <strong><field name="name"/></strong>
+                                        <div class="text-muted small"><field name="ref_code"/></div>
+                                    </div>
+                                </div>
+                                <ul class="oe_kanban_dropdown_menu ps-0 mt-2" style="list-style:none;">
+                                    <li t-if="record.email.value"><i class="fa fa-envelope-o me-1"/>
+                                        <field name="email"/>
+                                    </li>
+                                    <li t-if="record.phone.value"><i class="fa fa-phone me-1"/>
+                                        <field name="phone"/>
+                                    </li>
+                                    <li t-if="record.city_interested.value"><i class="fa fa-map-marker me-1"/>
+                                        <field name="city_interested"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════
+         SEARCH VIEW
+    ═══════════════════════════════════════════════════ -->
+    <record id="view_dealership_application_search" model="ir.ui.view">
+        <field name="name">dealership.application.search</field>
+        <field name="model">dealership.application</field>
+        <field name="arch" type="xml">
+            <search string="Search Dealer Applications">
+                <field name="name" string="Name"/>
+                <field name="ref_code" string="Reference Code"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="city_interested"/>
+                <field name="country_interested_id"/>
+                <field name="business_type"/>
+                <!-- Filters -->
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_submitted" string="Submitted" domain="[('state', '=', 'submitted')]"/>
+                <filter name="filter_process" string="In Process" domain="[('state', '=', 'process')]"/>
+                <filter name="filter_pending" string="Pending" domain="[('state', '=', 'pending')]"/>
+                <filter name="filter_done" string="Approved" domain="[('state', '=', 'done')]"/>
+                <filter name="filter_declined" string="Declined" domain="[('state', '=', 'declined')]"/>
+                <separator/>
+                <filter name="filter_portal" string="Portal Access Granted"
+                        domain="[('portal_access_granted', '=', True)]"/>
+                <filter name="filter_published" string="Listed on Website"
+                        domain="[('website_published', '=', True)]"/>
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_business_type" string="Business Type" context="{'group_by': 'business_type'}"/>
+                    <filter name="group_by_country" string="Country" context="{'group_by': 'country_interested_id'}"/>
+                    <filter name="group_by_submitted" string="Submitted On" context="{'group_by': 'submitted_on:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════
+         WINDOW ACTIONS
+    ═══════════════════════════════════════════════════ -->
+    <record id="action_dealership_application" model="ir.actions.act_window">
+        <field name="name">Dealer Applications</field>
+        <field name="res_model">dealership.application</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_dealership_application_search"/>
+        <field name="context">{'search_default_filter_submitted': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No dealer applications yet.
+            </p>
+            <p>
+                Dealer applications will appear here once submitted via the website
+                or created manually. Start by sharing the <em>Become a Dealer</em> page.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_dealership_application_all" model="ir.actions.act_window">
+        <field name="name">All Applications</field>
+        <field name="res_model">dealership.application</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_dealership_application_search"/>
+    </record>
+
+    <record id="action_dealership_application_approved" model="ir.actions.act_window">
+        <field name="name">Active Dealers</field>
+        <field name="res_model">dealership.application</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+        <field name="search_view_id" ref="view_dealership_application_search"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend portal home to add Dealer Profile link for approved dealers -->
+    <template id="portal_my_home_dealer"
+              name="Dealer Portal Home Entry"
+              inherit_id="portal.portal_my_home"
+              priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="is_dealer" t-value="request.env.user.partner_id.is_dealer if not request.env.user._is_public() else False"/>
+            <t t-if="is_dealer">
+                <div class="mb-4 p-4 rounded-3"
+                     style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #a5d6a7;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h6 class="fw-bold mb-1" style="color:#1b5e20;">
+                                🤝 Dealer Account Active
+                            </h6>
+                            <p class="mb-0 small text-muted">
+                                Manage your dealer profile, orders, leads and contracts.
+                            </p>
+                        </div>
+                        <a href="/dealer-profile" class="btn btn-success btn-sm px-4">
+                            <i class="fa fa-store me-2"/>Dealer Profile
+                        </a>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

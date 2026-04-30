@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Website Top Menu: Become a Dealer -->
+        <record id="website_menu_become_dealer" model="website.menu">
+            <field name="name">Become a Dealer</field>
+            <field name="url">/become-a-dealer</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence">70</field>
+        </record>
+
+        <!-- Website Top Menu: Find a Dealer -->
+        <record id="website_menu_find_dealer" model="website.menu">
+            <field name="name">Find a Dealer</field>
+            <field name="url">/find-a-dealer</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence">71</field>
+        </record>
+
+        <!-- Portal / Logged-in Menu: Dealer Profile
+             Note: This is shown only to portal users who are dealers
+             via the template's auth='user' route guard.
+        -->
+    </data>
+</odoo>

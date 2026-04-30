@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="template_become_dealer" name="Become a Dealer">
+    <t t-call="website.layout">
+        <t t-set="title">Become a Dealer</t>
+
+        <!-- ══════════════════════ HERO BANNER ══════════════════════ -->
+        <div class="dealer-hero position-relative overflow-hidden"
+             style="background: linear-gradient(135deg, #0d1b4b 0%, #1565c0 60%, #0288d1 100%); min-height: 280px;">
+            <!-- Decorative circles -->
+            <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"/>
+            <div style="position:absolute;bottom:-80px;left:10%;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"/>
+            <div class="container py-5 position-relative" style="z-index:2;">
+                <div class="row align-items-center">
+                    <div class="col-lg-7 text-white">
+                        <div class="d-inline-block mb-3"
+                             style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:6px 18px;font-size:0.85rem;letter-spacing:1px;">
+                            JOIN OUR NETWORK
+                        </div>
+                        <h1 class="display-5 fw-bold mb-3" style="text-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                            Become an Authorised Dealer
+                        </h1>
+                        <p class="lead mb-4" style="opacity:0.9;">
+                            Partner with us and grow your business. Fill out the form below and our team will get back to you.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center gap-2 text-white-50">
+                                <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✓</span>
+                                <span>Exclusive Territory</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-white-50">
+                                <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✓</span>
+                                <span>Marketing Support</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-white-50">
+                                <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✓</span>
+                                <span>Training Provided</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+                        <div style="background:rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:220px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size:3rem;text-align:center;margin-bottom:8px;">🤝</div>
+                            <p style="color:rgba(255,255,255,0.9);text-align:center;margin:0;font-size:0.9rem;">
+                                Join hundreds of dealers already in our network
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ══════════════════════ BREADCRUMB ══════════════════════ -->
+        <div class="bg-light border-bottom py-2">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 small">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Become a Dealer</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="container py-5">
+
+            <!-- ══ SUCCESS BLOCK ══ -->
+            <t t-if="success">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow text-center p-5"
+                             style="border-radius:16px;">
+                            <div style="width:80px;height:80px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2.5rem;">✅</div>
+                            <h3 class="fw-bold text-success mb-2">Application Submitted!</h3>
+                            <p class="text-muted mb-3">
+                                Thank you <strong t-esc="applicant_name"/>, we've received your application.
+                            </p>
+                            <div class="py-3 px-4 rounded-3 mb-4"
+                                 style="background:#f0f7ff;border:2px dashed #1565c0;">
+                                <small class="text-muted d-block mb-1">Your Reference Code</small>
+                                <span class="h4 fw-bold text-primary" t-esc="ref_code"/>
+                            </div>
+                            <p class="text-muted small mb-4">
+                                A confirmation email has been sent to your address. Use your reference code to track status.
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a t-attf-href="/dealer-status?ref_code={{ ref_code }}"
+                                   class="btn btn-primary">
+                                    <i class="fa fa-search me-2"/>Track My Application
+                                </a>
+                                <a href="/become-a-dealer" class="btn btn-outline-secondary">Submit Another</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ══ APPLICATION FORM ══ -->
+            <t t-if="not success">
+                <t t-if="error.get('general')">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <t t-esc="error['general']"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <div class="row g-5">
+                    <!-- LEFT COLUMN: Form -->
+                    <div class="col-lg-8">
+                        <form method="POST" action="/become-a-dealer/submit"
+                              enctype="multipart/form-data"
+                              id="dealerApplicationForm"
+                              novalidate="">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+
+                            <!-- ── SECTION 1: Personal Information ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-user me-2"/>Personal Information
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                                            <input type="text" name="name" class="form-control"
+                                                   t-att-value="values.get('name','') if values else ''"
+                                                   t-att-class="'form-control is-invalid' if error.get('name') else 'form-control'"
+                                                   placeholder="Your full legal name"/>
+                                            <t t-if="error.get('name')"><div class="invalid-feedback" t-esc="error['name']"/></t>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Date of Birth</label>
+                                            <input type="date" name="dob" class="form-control"
+                                                   t-att-value="values.get('dob','') if values else ''"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Phone Number <span class="text-danger">*</span></label>
+                                            <input type="tel" name="phone" class="form-control"
+                                                   t-att-value="values.get('phone','') if values else ''"
+                                                   t-att-class="'form-control is-invalid' if error.get('phone') else 'form-control'"
+                                                   placeholder="+1 555 000 0000"/>
+                                            <t t-if="error.get('phone')"><div class="invalid-feedback" t-esc="error['phone']"/></t>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                                            <input type="email" name="email" class="form-control"
+                                                   t-att-value="values.get('email','') if values else ''"
+                                                   t-att-class="'form-control is-invalid' if error.get('email') else 'form-control'"
+                                                   placeholder="you@example.com"/>
+                                            <t t-if="error.get('email')"><div class="invalid-feedback" t-esc="error['email']"/></t>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Secondary Phone</label>
+                                            <input type="tel" name="secondary_phone" class="form-control"
+                                                   t-att-value="values.get('secondary_phone','') if values else ''"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Secondary Email</label>
+                                            <input type="email" name="secondary_email" class="form-control"
+                                                   t-att-value="values.get('secondary_email','') if values else ''"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 2: Address ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-home me-2"/>Home Address
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold small">Street / House No.</label>
+                                            <input type="text" name="street" class="form-control"
+                                                   t-att-value="values.get('street','') if values else ''"
+                                                   placeholder="123 Main Street"/>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold small">Street 2 / Area / Apartment</label>
+                                            <input type="text" name="street2" class="form-control"
+                                                   t-att-value="values.get('street2','') if values else ''"
+                                                   placeholder="Suite, Floor, Area (optional)"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">City</label>
+                                            <input type="text" name="home_city" class="form-control"
+                                                   t-att-value="values.get('home_city','') if values else ''"
+                                                   placeholder="City"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Postal / ZIP Code</label>
+                                            <input type="text" name="home_zip" class="form-control"
+                                                   t-att-value="values.get('home_zip','') if values else ''"
+                                                   placeholder="12345"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Country</label>
+                                            <select name="home_country_id" class="form-select" id="homeCountrySelect">
+                                                <option value="">-- Select Country --</option>
+                                                <t t-foreach="countries" t-as="c">
+                                                    <option t-att-value="c.id" t-esc="c.name"/>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">State / Province</label>
+                                            <select name="home_state_id" class="form-select" id="homeStateSelect">
+                                                <option value="">-- Select State --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 3: Professional Background ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-briefcase me-2"/>Professional Background
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Current Occupation</label>
+                                            <input type="text" name="current_occupation" class="form-control"
+                                                   t-att-value="values.get('current_occupation','') if values else ''"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Qualification</label>
+                                            <input type="text" name="qualification" class="form-control"
+                                                   t-att-value="values.get('qualification','') if values else ''"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">How did you hear about this vacancy?</label>
+                                            <select name="vacancy_known_through" class="form-select">
+                                                <option value="">-- Select --</option>
+                                                <option value="social_media">Social Media</option>
+                                                <option value="newspaper">Newspaper / Magazine</option>
+                                                <option value="friend">Friend / Colleague</option>
+                                                <option value="website">Company Website</option>
+                                                <option value="exhibition">Exhibition / Trade Show</option>
+                                                <option value="tv">TV / Radio</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Business Type</label>
+                                            <select name="business_type" class="form-select">
+                                                <option value="">-- Select --</option>
+                                                <option value="retail">Retail</option>
+                                                <option value="wholesale">Wholesale</option>
+                                                <option value="distribution">Distribution</option>
+                                                <option value="franchise">Franchise</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold small">Dealer Code (if any)</label>
+                                            <input type="text" name="code" class="form-control"
+                                                   t-att-value="values.get('code','') if values else ''"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 4: Location of Interest ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-map-marker me-2"/>Location of Interest
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold small">Country Interested In</label>
+                                            <select name="country_interested_id" class="form-select" id="intCountrySelect">
+                                                <option value="">-- Select --</option>
+                                                <t t-foreach="countries" t-as="c">
+                                                    <option t-att-value="c.id" t-esc="c.name"/>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold small">State Interested In</label>
+                                            <select name="state_interested_id" class="form-select" id="intStateSelect">
+                                                <option value="">-- Select --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold small">City Interested In</label>
+                                            <input type="text" name="city_interested" class="form-control"
+                                                   t-att-value="values.get('city_interested','') if values else ''"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 5: Business Experience ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-history me-2"/>Business Experience
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" name="has_experience" id="hasExperience"
+                                               class="form-check-input" value="1"/>
+                                        <label class="form-check-label fw-semibold" for="hasExperience">
+                                            Do you have any experience in our type of business?
+                                        </label>
+                                    </div>
+                                    <div id="experienceSection" style="display:none;">
+                                        <div id="experienceRows">
+                                            <div class="row g-2 align-items-end mb-2 exp-row border rounded p-2 mx-0" style="background:#f8f9fa;">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small mb-1">Company Name</label>
+                                                    <input type="text" name="exp_company_0" class="form-control form-control-sm" placeholder="Company name"/>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small mb-1">Role / Position</label>
+                                                    <input type="text" name="exp_role_0" class="form-control form-control-sm" placeholder="Your role"/>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label small mb-1">From</label>
+                                                    <input type="date" name="exp_from_0" class="form-control form-control-sm"/>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label small mb-1">To</label>
+                                                    <input type="date" name="exp_to_0" class="form-control form-control-sm"/>
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-exp-btn">Remove</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addExpBtn">
+                                            <i class="fa fa-plus me-1"/>Add Experience
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 6: Financial ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-dollar me-2"/>Financial Information
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Last One Year Turnover</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="last_year_turnover" class="form-control" min="0" step="0.01" placeholder="0.00"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Total Area (Sq Ft)</label>
+                                            <div class="input-group">
+                                                <input type="number" name="total_area" class="form-control" min="0" step="0.01" placeholder="0.00"/>
+                                                <span class="input-group-text">sq ft</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold small">Dealer Investment Range</label>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-auto"><div class="input-group input-group-sm"><span class="input-group-text">$</span><input type="number" name="investment_from" class="form-control" placeholder="From" style="width:120px;"/></div></div>
+                                                <div class="col-auto fw-bold text-muted">—</div>
+                                                <div class="col-auto"><div class="input-group input-group-sm"><span class="input-group-text">$</span><input type="number" name="investment_to" class="form-control" placeholder="To" style="width:120px;"/></div></div>
+                                                <div class="col-auto">
+                                                    <div class="form-check form-check-inline mb-0">
+                                                        <input type="checkbox" name="investment_available" class="form-check-input" value="1" id="invAvailable"/>
+                                                        <label class="form-check-label small" for="invAvailable">Available</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline mb-0">
+                                                        <input type="checkbox" name="investment_not_available" class="form-check-input" value="1" id="invNotAvailable"/>
+                                                        <label class="form-check-label small" for="invNotAvailable">Not Available</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── SECTION 7: Enquiry & Attachments ── -->
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius:12px;overflow:hidden;">
+                                <div class="card-header border-0 py-3 px-4"
+                                     style="background:linear-gradient(90deg,#1565c0,#0288d1);">
+                                    <h6 class="mb-0 text-white fw-semibold">
+                                        <i class="fa fa-paperclip me-2"/>Enquiry &amp; Attachments
+                                    </h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small">Enquiry Description</label>
+                                        <textarea name="enquiry_description" class="form-control" rows="4"
+                                                  placeholder="Describe your interest, current business setup, and why you'd like to join our dealer network..."></textarea>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Shop / Outlet Image</label>
+                                            <input type="file" name="shop_image" class="form-control" accept="image/*" id="shopImageInput"/>
+                                            <div id="shopImagePreview" class="mt-2"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold small">Supporting Documents</label>
+                                            <input type="file" name="documents" class="form-control" multiple="" id="docsInput"/>
+                                            <div id="docsPreview" class="mt-1"/>
+                                            <small class="text-muted">PDF, images, etc. Multiple files allowed.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg py-3" id="submitBtn"
+                                        style="border-radius:8px;font-size:1.05rem;">
+                                    <i class="fa fa-paper-plane me-2"/>Submit Application
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- RIGHT COLUMN: Info sidebar -->
+                    <div class="col-lg-4">
+                        <div class="sticky-top" style="top:80px;">
+                            <!-- Track existing application -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa fa-search me-2 text-primary"/>Track Existing Application
+                                    </h6>
+                                    <p class="text-muted small mb-3">Already applied? Enter your reference code to check the status.</p>
+                                    <form method="GET" action="/dealer-status">
+                                        <div class="input-group">
+                                            <input type="text" name="ref_code" class="form-control"
+                                                   placeholder="e.g. DA/2025/00001"/>
+                                            <button type="submit" class="btn btn-outline-primary">Track</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- What happens next -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;background:linear-gradient(135deg,#e3f2fd,#fff);">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3">What Happens Next?</h6>
+                                    <div class="d-flex gap-3 mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div style="width:32px;height:32px;background:#1565c0;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;">1</div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold small">Application Review</div>
+                                            <div class="text-muted" style="font-size:0.8rem;">Our team reviews your application within 2–3 business days.</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-3 mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div style="width:32px;height:32px;background:#1565c0;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;">2</div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold small">Purchase Required</div>
+                                            <div class="text-muted" style="font-size:0.8rem;">You'll receive an invoice. Once paid and delivered, your dealer account activates.</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-3">
+                                        <div class="flex-shrink-0">
+                                            <div style="width:32px;height:32px;background:#2e7d32;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;">3</div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold small">Portal Access</div>
+                                            <div class="text-muted" style="font-size:0.8rem;">Get your dealer profile, track orders and leads from your portal.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+
+        <!-- JS -->
+        <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Experience toggle
+            var hasExp = document.getElementById('hasExperience');
+            var expSection = document.getElementById('experienceSection');
+            if (hasExp) {
+                hasExp.addEventListener('change', function() {
+                    expSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+            // Add exp row
+            var expIdx = 1;
+            var addExpBtn = document.getElementById('addExpBtn');
+            if (addExpBtn) {
+                addExpBtn.addEventListener('click', function() {
+                    var rows = document.getElementById('experienceRows');
+                    var div = document.createElement('div');
+                    div.className = 'row g-2 align-items-end mb-2 exp-row border rounded p-2 mx-0';
+                    div.style.background = '#f8f9fa';
+                    div.innerHTML =
+                        '<div class="col-md-3"><label class="form-label small mb-1">Company Name</label><input type="text" name="exp_company_' + expIdx + '" class="form-control form-control-sm" placeholder="Company name"/></div>' +
+                        '<div class="col-md-3"><label class="form-label small mb-1">Role</label><input type="text" name="exp_role_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                        '<div class="col-md-2"><label class="form-label small mb-1">From</label><input type="date" name="exp_from_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                        '<div class="col-md-2"><label class="form-label small mb-1">To</label><input type="date" name="exp_to_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                        '<div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-exp-btn">Remove</button></div>';
+                    rows.appendChild(div);
+                    div.querySelector('.remove-exp-btn').addEventListener('click', function() { div.remove(); });
+                    expIdx++;
+                });
+            }
+            document.querySelectorAll('.remove-exp-btn').forEach(function(b) {
+                b.addEventListener('click', function() { b.closest('.exp-row').remove(); });
+            });
+
+            // Country → State (home address)
+            function loadStates(countrySelectId, stateSelectId) {
+                var cSel = document.getElementById(countrySelectId);
+                var sSel = document.getElementById(stateSelectId);
+                if (!cSel || !sSel) return;
+                cSel.addEventListener('change', function() {
+                    sSel.innerHTML = '<option value="">-- Select State --</option>';
+                    if (!this.value) return;
+                    fetch('/dealer/get-states', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({jsonrpc:'2.0', method:'call', params:{country_id: parseInt(this.value)}})
+                    }).then(function(r){return r.json();}).then(function(d){
+                        if (d.result) d.result.forEach(function(s){
+                            var o = document.createElement('option');
+                            o.value = s.id; o.textContent = s.name;
+                            sSel.appendChild(o);
+                        });
+                    });
+                });
+            }
+            loadStates('homeCountrySelect', 'homeStateSelect');
+            loadStates('intCountrySelect', 'intStateSelect');
+
+            // Image preview
+            var shopImg = document.getElementById('shopImageInput');
+            var preview = document.getElementById('shopImagePreview');
+            if (shopImg) {
+                shopImg.addEventListener('change', function() {
+                    var f = this.files[0];
+                    if (f &amp;&amp; f.type.startsWith('image/')) {
+                        var r = new FileReader();
+                        r.onload = function(e) {
+                            preview.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail mt-1" style="max-height:120px;border-radius:8px;"/>';
+                        };
+                        r.readAsDataURL(f);
+                    }
+                });
+            }
+
+            // Docs preview
+            var docsInput = document.getElementById('docsInput');
+            var docsPreview = document.getElementById('docsPreview');
+            if (docsInput) {
+                docsInput.addEventListener('change', function() {
+                    docsPreview.innerHTML = '';
+                    Array.from(this.files).forEach(function(f) {
+                        var span = document.createElement('span');
+                        span.className = 'badge bg-light text-dark border me-1 mt-1';
+                        span.innerHTML = '<i class="fa fa-file-o me-1"></i>' + f.name;
+                        docsPreview.appendChild(span);
+                    });
+                });
+            }
+
+            // Submit spinner
+            var submitBtn = document.getElementById('submitBtn');
+            var form = document.getElementById('dealerApplicationForm');
+            if (form &amp;&amp; submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+                });
+            }
+
+<!--            // Track by ref code from sidebar-->
+<!--            var trackForm = document.querySelector('form[action="/dealer-status"]');-->
+<!--            if (trackForm) {-->
+<!--                trackForm.addEventListener('submit', function(e) {-->
+<!--                    var refInput = this.querySelector('input[name="ref_code"]');-->
+<!--                    if (refInput &amp;&amp; refInput.value.trim()) {-->
+<!--                        e.preventDefault();-->
+<!--                        window.location.href = '/dealer-status/' + encodeURIComponent(refInput.value.trim());-->
+<!--                    }-->
+<!--                });-->
+            }
+        });
+        </script>
+    </t>
+</template>
+</odoo>
