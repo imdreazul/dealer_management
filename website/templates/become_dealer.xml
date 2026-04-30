@@ -500,117 +500,60 @@
 
         <!-- JS -->
         <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            // Experience toggle
-            var hasExp = document.getElementById('hasExperience');
-            var expSection = document.getElementById('experienceSection');
-            if (hasExp) {
-                hasExp.addEventListener('change', function() {
-                    expSection.style.display = this.checked ? 'block' : 'none';
-                });
-            }
-            // Add exp row
-            var expIdx = 1;
-            var addExpBtn = document.getElementById('addExpBtn');
-            if (addExpBtn) {
-                addExpBtn.addEventListener('click', function() {
-                    var rows = document.getElementById('experienceRows');
-                    var div = document.createElement('div');
-                    div.className = 'row g-2 align-items-end mb-2 exp-row border rounded p-2 mx-0';
-                    div.style.background = '#f8f9fa';
-                    div.innerHTML =
-                        '<div class="col-md-3"><label class="form-label small mb-1">Company Name</label><input type="text" name="exp_company_' + expIdx + '" class="form-control form-control-sm" placeholder="Company name"/></div>' +
-                        '<div class="col-md-3"><label class="form-label small mb-1">Role</label><input type="text" name="exp_role_' + expIdx + '" class="form-control form-control-sm"/></div>' +
-                        '<div class="col-md-2"><label class="form-label small mb-1">From</label><input type="date" name="exp_from_' + expIdx + '" class="form-control form-control-sm"/></div>' +
-                        '<div class="col-md-2"><label class="form-label small mb-1">To</label><input type="date" name="exp_to_' + expIdx + '" class="form-control form-control-sm"/></div>' +
-                        '<div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-exp-btn">Remove</button></div>';
-                    rows.appendChild(div);
-                    div.querySelector('.remove-exp-btn').addEventListener('click', function() { div.remove(); });
-                    expIdx++;
-                });
-            }
-            document.querySelectorAll('.remove-exp-btn').forEach(function(b) {
-                b.addEventListener('click', function() { b.closest('.exp-row').remove(); });
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // 1. Experience Toggle
+                var hasExp = document.getElementById('hasExperience');
+                var expSection = document.getElementById('experienceSection');
+                if (hasExp) {
+                    hasExp.addEventListener('change', function() {
+                        expSection.style.display = this.checked ? 'block' : 'none';
+                    });
+                }
+
+                // 2. Add Experience Row
+                var expIdx = 1;
+                var addExpBtn = document.getElementById('addExpBtn');
+                if (addExpBtn) {
+                    addExpBtn.addEventListener('click', function() {
+                        var rows = document.getElementById('experienceRows');
+                        var div = document.createElement('div');
+                        div.className = 'row g-2 align-items-end mb-2 exp-row border rounded p-2 mx-0';
+                        div.style.background = '#f8f9fa';
+                        div.innerHTML = 
+                            '<div class="col-md-3"><label class="form-label small mb-1">Company</label><input type="text" name="exp_company_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                            '<div class="col-md-3"><label class="form-label small mb-1">Role</label><input type="text" name="exp_role_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                            '<div class="col-md-2"><label class="form-label small mb-1">From</label><input type="date" name="exp_from_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                            '<div class="col-md-2"><label class="form-label small mb-1">To</label><input type="date" name="exp_to_' + expIdx + '" class="form-control form-control-sm"/></div>' +
+                            '<div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-exp-btn">Remove</button></div>';
+                        rows.appendChild(div);
+                        div.querySelector('.remove-exp-btn').addEventListener('click', function() { div.remove(); });
+                        expIdx++;
+                    });
+                }
+
+                // 3. Image Preview (NO AMPERSANDS HERE)
+                var shopImageInput = document.querySelector('input[name="shop_image"]');
+                var previewContainer = document.getElementById('shopImagePreview');
+                if (shopImageInput) {
+                    shopImageInput.addEventListener('change', function () {
+                        var file = this.files[0];
+                        // Nested IF avoids the &amp;&amp; XML crash
+                        if (file) {
+                            if (file.type.startsWith('image/')) {
+                                var reader = new FileReader();
+                                reader.onload = function (e) {
+                                    previewContainer.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail mt-1" style="max-height:120px;border-radius:8px;"/>';
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        } else {
+                            previewContainer.innerHTML = '';
+                        }
+                    });
+                }
             });
-
-            // Country → State (home address)
-            function loadStates(countrySelectId, stateSelectId) {
-                var cSel = document.getElementById(countrySelectId);
-                var sSel = document.getElementById(stateSelectId);
-                if (!cSel || !sSel) return;
-                cSel.addEventListener('change', function() {
-                    sSel.innerHTML = '<option value="">-- Select State --</option>';
-                    if (!this.value) return;
-                    fetch('/dealer/get-states', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({jsonrpc:'2.0', method:'call', params:{country_id: parseInt(this.value)}})
-                    }).then(function(r){return r.json();}).then(function(d){
-                        if (d.result) d.result.forEach(function(s){
-                            var o = document.createElement('option');
-                            o.value = s.id; o.textContent = s.name;
-                            sSel.appendChild(o);
-                        });
-                    });
-                });
-            }
-            loadStates('homeCountrySelect', 'homeStateSelect');
-            loadStates('intCountrySelect', 'intStateSelect');
-
-            // Image preview
-            var shopImg = document.getElementById('shopImageInput');
-            var preview = document.getElementById('shopImagePreview');
-            if (shopImg) {
-                shopImg.addEventListener('change', function() {
-                    var f = this.files[0];
-                    if (f &amp;&amp; f.type.startsWith('image/')) {
-                        var r = new FileReader();
-                        r.onload = function(e) {
-                            preview.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail mt-1" style="max-height:120px;border-radius:8px;"/>';
-                        };
-                        r.readAsDataURL(f);
-                    }
-                });
-            }
-
-            // Docs preview
-            var docsInput = document.getElementById('docsInput');
-            var docsPreview = document.getElementById('docsPreview');
-            if (docsInput) {
-                docsInput.addEventListener('change', function() {
-                    docsPreview.innerHTML = '';
-                    Array.from(this.files).forEach(function(f) {
-                        var span = document.createElement('span');
-                        span.className = 'badge bg-light text-dark border me-1 mt-1';
-                        span.innerHTML = '<i class="fa fa-file-o me-1"></i>' + f.name;
-                        docsPreview.appendChild(span);
-                    });
-                });
-            }
-
-            // Submit spinner
-            var submitBtn = document.getElementById('submitBtn');
-            var form = document.getElementById('dealerApplicationForm');
-            if (form &amp;&amp; submitBtn) {
-                form.addEventListener('submit', function() {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
-                });
-            }
-
-<!--            // Track by ref code from sidebar-->
-<!--            var trackForm = document.querySelector('form[action="/dealer-status"]');-->
-<!--            if (trackForm) {-->
-<!--                trackForm.addEventListener('submit', function(e) {-->
-<!--                    var refInput = this.querySelector('input[name="ref_code"]');-->
-<!--                    if (refInput &amp;&amp; refInput.value.trim()) {-->
-<!--                        e.preventDefault();-->
-<!--                        window.location.href = '/dealer-status/' + encodeURIComponent(refInput.value.trim());-->
-<!--                    }-->
-<!--                });-->
-            }
-        });
-        </script>
+            </script>
     </t>
 </template>
 </odoo>
