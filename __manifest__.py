@@ -54,6 +54,7 @@
         'website/templates/portal_dealer.xml',
         # Website Templates
         'website/templates/become_dealer.xml',
+        'website/templates/dealer_orders_templates.xml',
         'website/templates/application_status.xml',
         'website/templates/dealer_profile.xml',
         'website/templates/find_dealer.xml',

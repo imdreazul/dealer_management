@@ -199,49 +199,49 @@ class DealerWebsiteController(http.Controller):
     #  DEALER PROFILE – portal users only
     # ═══════════════════════════════════════════════════════════════
 
-    @http.route('/dealer-profile', type='http', auth='user', website=True)
-    def dealer_profile(self, **kwargs):
-        """Dealer profile page. Requires portal/internal user login."""
-        try:
-            partner = request.env.user.partner_id
-            application = request.env['dealership.application'].sudo().search(
-                [('partner_id', '=', partner.id), ('state', '=', 'done')],
-                limit=1
-            )
-            if not application:
-                # User is logged in but not an approved dealer
-                return request.render('dealer_management.template_not_a_dealer', {
-                    'partner': partner,
-                })
-
-            sale_orders = request.env['sale.order'].sudo().search(
-                [('dealer_application_id', '=', application.id)],
-                order='date_order desc', limit=20
-            )
-            leads = request.env['crm.lead'].sudo().search(
-                [('dealer_application_id', '=', application.id)],
-                order='create_date desc', limit=20
-            )
-            contracts = request.env['dealership.contract'].sudo().search(
-                [('application_id', '=', application.id)],
-                order='id desc'
-            )
-
-            return request.render('dealer_management.template_dealer_profile', {
-                'application': application,
-                'partner': partner,
-                'sale_orders': sale_orders,
-                'leads': leads,
-                'contracts': contracts,
-                'success': False,
-                'error': {},
-            })
-        except Exception as e:
-            _logger.exception('Error rendering dealer profile for user %s', request.env.user.login)
-            return request.render('dealer_management.template_not_a_dealer', {
-                'partner': request.env.user.partner_id,
-                'error_msg': str(e),
-            })
+    # @http.route('/dealer-profile', type='http', auth='user', website=True)
+    # def dealer_profile(self, **kwargs):
+    #     """Dealer profile page. Requires portal/internal user login."""
+    #     try:
+    #         partner = request.env.user.partner_id
+    #         application = request.env['dealership.application'].sudo().search(
+    #             [('partner_id', '=', partner.id), ('state', '=', 'done')],
+    #             limit=1
+    #         )
+    #         if not application:
+    #             # User is logged in but not an approved dealer
+    #             return request.render('dealer_management.template_not_a_dealer', {
+    #                 'partner': partner,
+    #             })
+    #
+    #         sale_orders = request.env['sale.order'].sudo().search(
+    #             [('dealer_application_id', '=', application.id)],
+    #             order='date_order desc', limit=20
+    #         )
+    #         leads = request.env['crm.lead'].sudo().search(
+    #             [('dealer_application_id', '=', application.id)],
+    #             order='create_date desc', limit=20
+    #         )
+    #         contracts = request.env['dealership.contract'].sudo().search(
+    #             [('application_id', '=', application.id)],
+    #             order='id desc'
+    #         )
+    #
+    #         return request.render('dealer_management.template_dealer_profile', {
+    #             'application': application,
+    #             'partner': partner,
+    #             'sale_orders': sale_orders,
+    #             'leads': leads,
+    #             'contracts': contracts,
+    #             'success': False,
+    #             'error': {},
+    #         })
+    #     except Exception as e:
+    #         _logger.exception('Error rendering dealer profile for user %s', request.env.user.login)
+    #         return request.render('dealer_management.template_not_a_dealer', {
+    #             'partner': request.env.user.partner_id,
+    #             'error_msg': str(e),
+    #         })
 
     @http.route(
         '/dealer-profile/update',
@@ -380,3 +380,134 @@ class DealerWebsiteController(http.Controller):
                     subtype_xmlid='mail.mt_comment',
                 )
         return request.redirect(f'/dealer-status/{ref_code}' if ref_code else '/become-a-dealer')
+
+    # ═══════════════════════════════════════════════════════════════
+    #  UPDATED: DEALER PROFILE (Includes Pagination & Products for Modal)
+    # ═══════════════════════════════════════════════════════════════
+    @http.route(['/dealer-profile', '/dealer-profile/page/<int:page>'], type='http', auth='user', website=True)
+    def dealer_profile(self, page=1, **kwargs):
+        try:
+            partner = request.env.user.partner_id
+            application = request.env['dealership.application'].sudo().search(
+                [('partner_id', '=', partner.id), ('state', '=', 'done')],
+                limit=1
+            )
+            if not application:
+                return request.render('dealer_management.template_not_a_dealer', {'partner': partner})
+
+            # Pagination Setup for Sale Orders
+            domain = [('dealer_application_id', '=', application.id)]
+            total_orders = request.env['sale.order'].sudo().search_count(domain)
+            step = 10
+            pager = request.website.pager(
+                url='/dealer-profile',
+                total=total_orders,
+                page=page,
+                step=step,
+                scope=5
+            )
+
+            sale_orders = request.env['sale.order'].sudo().search(
+                domain,
+                order='date_order desc',
+                limit=step,
+                offset=pager['offset']
+            )
+
+            leads = request.env['crm.lead'].sudo().search([('dealer_application_id', '=', application.id)],
+                                                          order='create_date desc', limit=20)
+            contracts = request.env['dealership.contract'].sudo().search([('application_id', '=', application.id)],
+                                                                         order='id desc')
+
+            # Fetch active products for the Create Order Modal
+            products = request.env['product.product'].sudo().search([('sale_ok', '=', True)])
+
+            return request.render('dealer_management.template_dealer_profile', {
+                'application': application,
+                'partner': partner,
+                'sale_orders': sale_orders,
+                'pager': pager,
+                'leads': leads,
+                'contracts': contracts,
+                'products': products,  # Added for the modal
+                'success': kwargs.get('order_success', False),  # Show success message if redirected
+                'error': {},
+            })
+        except Exception as e:
+            return request.render('dealer_management.template_not_a_dealer', {
+                'partner': request.env.user.partner_id,
+                'error_msg': str(e),
+            })
+
+# ═══════════════════════════════════════════════════════════════
+    #  NEW: CREATE SALE ORDER
+    # ═══════════════════════════════════════════════════════════════
+    @http.route('/dealer-profile/order/create', type='http', auth='user', website=True)
+    def dealer_order_create(self, **kwargs):
+        partner = request.env.user.partner_id
+        application = request.env['dealership.application'].sudo().search(
+            [('partner_id', '=', partner.id), ('state', '=', 'done')], limit=1
+        )
+        if not application:
+            return request.redirect('/dealer-profile')
+
+        # Fetch active products that can be sold
+        products = request.env['product.product'].sudo().search([('sale_ok', '=', True)])
+
+        return request.render('dealer_management.template_dealer_order_create', {
+            'application': application,
+            'products': products,
+        })
+
+    @http.route('/dealer-profile/order/submit', type='http', auth='user', methods=['POST'], website=True, csrf=True)
+    def dealer_order_submit(self, **post):
+        partner = request.env.user.partner_id
+        application = request.env['dealership.application'].sudo().search(
+            [('partner_id', '=', partner.id), ('state', '=', 'done')], limit=1
+        )
+        if not application:
+            return request.redirect('/dealer-profile')
+
+        order_vals = {
+            'partner_id': partner.id,
+            'dealer_application_id': application.id,
+            'state': 'draft',
+        }
+        order = request.env['sale.order'].sudo().create(order_vals)
+
+        line_count = int(post.get('line_count', 0))
+        for i in range(line_count):
+            product_id = post.get(f'product_id_{i}')
+            qty = post.get(f'qty_{i}')
+
+            if product_id and qty and float(qty) > 0:
+                request.env['sale.order.line'].sudo().create({
+                    'order_id': order.id,
+                    'product_id': int(product_id),
+                    'product_uom_qty': float(qty),
+                })
+
+        # Redirect back to profile page with a success flag
+        return request.redirect('/dealer-profile?order_success=1')
+
+    # ═══════════════════════════════════════════════════════════════
+    #  NEW: VIEW SALE ORDER DETAILS
+    # ═══════════════════════════════════════════════════════════════
+    @http.route('/dealer-profile/order/<int:order_id>', type='http', auth='user', website=True)
+    def dealer_order_view(self, order_id, **kwargs):
+        partner = request.env.user.partner_id
+        # Ensure the order exists and belongs to this specific dealer
+        order = request.env['sale.order'].sudo().search([
+            ('id', '=', order_id),
+            ('partner_id', '=', partner.id)
+        ], limit=1)
+
+        if not order:
+            return request.redirect('/dealer-profile')
+
+        return request.render('dealer_management.template_dealer_order_view', {
+            'order': order,
+        })
+
+
+

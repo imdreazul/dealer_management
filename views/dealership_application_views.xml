@@ -79,7 +79,7 @@
                         <button name="action_view_contracts"
                                 type="object"
                                 class="oe_stat_button"
-                                icon="fa-file-text-o">
+                                icon="fa-handshake">
                             <field name="contract_count" widget="statinfo" string="Contracts"/>
                         </button>
 <!--                        <button name="action_view_sale_orders"-->
