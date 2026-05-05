@@ -2,17 +2,17 @@
 <odoo>
     <template id="inherit_dealer_profile_orders" inherit_id="dealer_management.template_dealer_profile">
 
-        <!-- 1. Add "Create Order" button & Success Alert above the Orders list -->
+        <!-- 1. Add "Create Order" button & Success Alert -->
         <xpath expr="//div[@id='ordersPane']//t[@t-if='not sale_orders']" position="before">
             <div class="p-4 pb-0 d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 fw-bold">My Orders</h5>
+                <h5 class="mb-0 fw-bold">My Sale Orders</h5>
                 <!-- Trigger Create Modal Button -->
                 <button type="button" class="btn btn-primary btn-sm rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#createOrderModal">
                     <i class="fa fa-plus me-1"/> Create Order
                 </button>
             </div>
 
-            <!-- Success Alert if redirected from order creation -->
+            <!-- Success Alert -->
             <t t-if="success">
                 <div class="mx-4 alert alert-success alert-dismissible fade show" role="alert" style="border-radius:10px;">
                     <i class="fa fa-check-circle me-2"/> Order successfully created!
@@ -50,30 +50,17 @@
             </tr>
         </xpath>
 
-        <!-- 3. Add Pagination below the table -->
+        <!-- 3. Add Pagination -->
         <xpath expr="//div[@id='ordersPane']//div[hasclass('table-responsive')]" position="after">
             <div class="d-flex justify-content-center mt-4 mb-3">
                 <t t-call="website.pager"/>
             </div>
         </xpath>
 
-        <!-- 4. Inject Modals at the END of the layout (Outside the tabs to prevent Bootstrap conflict) -->
-        <xpath expr="//t[@t-call='website.layout']" position="inside">
-
-            <!-- Explicitly Load Select2 for the Portal -->
-            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-            <!-- CSS tweaks for Select2 inside Odoo portal -->
-            <style>
-                .select2-container .select2-selection--single { height: 32px !important; border: 1px solid #dee2e6; border-radius: 0.25rem; }
-                .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 32px !important; font-size: 0.875rem; }
-                .select2-container--default .select2-selection--single .select2-selection__arrow { height: 32px !important; }
-                .select2-container--open { z-index: 99999 !important; } /* Guarantee dropdown appears above modal */
-            </style>
+        <!-- 4. Inject Modals Safely INSIDE ordersPane so they definitely render -->
+        <xpath expr="//div[@id='ordersPane']" position="inside">
 
             <!-- CREATE ORDER MODAL -->
-            <!-- Note the addition of data-bs-focus="false" here - this fixes the typing issue natively! -->
             <div class="modal fade" id="createOrderModal" data-bs-focus="false" aria-labelledby="createOrderModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content" style="border-radius:14px; border:none;">
@@ -161,6 +148,78 @@
                 </div>
             </div>
 
+            <!-- VIEW ORDER MODALS -->
+            <t t-foreach="sale_orders" t-as="order">
+                <div class="modal fade" t-attf-id="viewOrderModal_{{ order.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content" style="border-radius:14px; border:none;">
+                            <div class="modal-header bg-light border-0" style="border-radius: 14px 14px 0 0;">
+                                <h5 class="modal-title fw-bold">
+                                    Order <span class="text-primary" t-esc="order.name"/>
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="row mb-4">
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted d-block">Status</small>
+                                        <t t-if="order.state in ['sale', 'done']">
+                                            <span class="badge bg-success">Confirmed</span>
+                                        </t>
+                                        <t t-elif="order.state == 'cancel'">
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-warning text-dark">Quotation</span>
+                                        </t>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted d-block">Order Date</small>
+                                        <span class="fw-semibold"><t t-esc="order.date_order.strftime('%d %b %Y') if order.date_order else 'N/A'"/></span>
+                                    </div>
+                                    <div class="col-md-4 mb-3 text-md-end">
+                                        <small class="text-muted d-block">Total Amount</small>
+                                        <span class="fw-bold fs-5 text-success">
+                                            <t t-esc="'%.2f' % order.amount_total"/> <t t-esc="order.currency_id.symbol"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-muted text-uppercase small letter-spacing-1 mb-2">Order Lines</h6>
+                                <div class="table-responsive border rounded">
+                                    <table class="table table-hover table-borderless align-middle mb-0">
+                                        <thead class="bg-light border-bottom">
+                                            <tr>
+                                                <th class="small text-muted">Product</th>
+                                                <th class="small text-muted text-center">Qty</th>
+                                                <th class="small text-muted text-end">Unit Price</th>
+                                                <th class="small text-muted text-end">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="order.order_line" t-as="line">
+                                                <tr class="border-bottom">
+                                                    <td>
+                                                        <span class="fw-semibold" t-esc="line.product_id.name"/>
+                                                    </td>
+                                                    <td class="text-center" t-esc="line.product_uom_qty"/>
+                                                    <td class="text-end">
+                                                        <t t-esc="'%.2f' % line.price_unit"/> <t t-esc="order.currency_id.symbol"/>
+                                                    </td>
+                                                    <td class="text-end fw-semibold">
+                                                        <t t-esc="'%.2f' % line.price_subtotal"/> <t t-esc="order.currency_id.symbol"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
             <!-- BULLETPROOF JAVASCRIPT -->
             <script type="text/javascript">
                 document.addEventListener('DOMContentLoaded', function() {
@@ -182,12 +241,10 @@
                     }
 
                     // 2. Initialize FIRST row using Vanilla JS Bootstrap Event Listener
-                    // This guarantees it fires exactly when the modal animation finishes
                     if (modalEl) {
                         modalEl.addEventListener('shown.bs.modal', function () {
                             const firstSelect = document.querySelector('#row_0 .searchable-select');
 
-                            // Prevent double-initialization
                             if (firstSelect &amp;&amp; !firstSelect.classList.contains('select2-hidden-accessible')) {
                                 initSelect2(firstSelect);
                             }
@@ -221,7 +278,6 @@
 
                             tbody.appendChild(newRow);
 
-                            // Initialize Select2 immediately because modal is already open
                             initSelect2(select);
 
                             lineCount++;
