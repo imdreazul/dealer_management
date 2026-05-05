@@ -3,9 +3,9 @@
     <template id="inherit_dealer_profile_orders" inherit_id="dealer_management.template_dealer_profile">
 
         <!-- 1. Add "Create Order" button & Success Alert above the Orders list -->
-        <xpath expr="//div[@id='ordersPane']//div[hasclass('card')]/t[@t-if='not sale_orders']" position="before">
+        <xpath expr="//div[@id='ordersPane']//t[@t-if='not sale_orders']" position="before">
             <div class="p-4 pb-0 d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 fw-bold">My Sale Orders</h5>
+                <h5 class="mb-0 fw-bold">My Orders</h5>
                 <!-- Trigger Create Modal Button -->
                 <button type="button" class="btn btn-primary btn-sm rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#createOrderModal">
                     <i class="fa fa-plus me-1"/> Create Order
@@ -22,7 +22,7 @@
         </xpath>
 
         <!-- 2. Make Table Rows trigger the View Modal -->
-        <xpath expr="//div[@id='ordersPane']//tbody//tr" position="replace">
+        <xpath expr="//div[@id='ordersPane']//tbody/t/tr" position="replace">
             <tr style="cursor: pointer; transition: background 0.2s;" class="table-hover" data-bs-toggle="modal" t-attf-data-bs-target="#viewOrderModal_{{ order.id }}">
                 <td class="px-4 fw-semibold text-primary" t-esc="order.name"/>
                 <td>
@@ -57,11 +57,24 @@
             </div>
         </xpath>
 
-        <!-- 4. Inject Modals and JavaScript at the bottom of the Orders Pane -->
-        <xpath expr="//div[@id='ordersPane']" position="inside">
+        <!-- 4. Inject Modals at the END of the layout (Outside the tabs to prevent Bootstrap conflict) -->
+        <xpath expr="//t[@t-call='website.layout']" position="inside">
+
+            <!-- Explicitly Load Select2 for the Portal -->
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+            <!-- CSS tweaks for Select2 inside Odoo portal -->
+            <style>
+                .select2-container .select2-selection--single { height: 32px !important; border: 1px solid #dee2e6; border-radius: 0.25rem; }
+                .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 32px !important; font-size: 0.875rem; }
+                .select2-container--default .select2-selection--single .select2-selection__arrow { height: 32px !important; }
+                .select2-container--open { z-index: 99999 !important; } /* Guarantee dropdown appears above modal */
+            </style>
 
             <!-- CREATE ORDER MODAL -->
-            <div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+            <!-- Note the addition of data-bs-focus="false" here - this fixes the typing issue natively! -->
+            <div class="modal fade" id="createOrderModal" data-bs-focus="false" aria-labelledby="createOrderModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content" style="border-radius:14px; border:none;">
                         <div class="modal-header border-0 pb-0">
@@ -76,7 +89,6 @@
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <input type="hidden" name="line_count" id="line_count" value="1"/>
 
-                                <!-- overflow:visible prevents Select2 dropdowns from being cut off by the table-responsive wrapper -->
                                 <div class="table-responsive mb-3 border rounded" style="overflow:visible;">
                                     <table class="table table-borderless align-middle mb-0" id="order_lines_table">
                                         <thead class="bg-light border-bottom">
@@ -88,10 +100,10 @@
                                         </thead>
                                         <tbody id="order_lines_body">
 
-                                            <!-- HIDDEN TEMPLATE ROW (Used for clean cloning) -->
+                                            <!-- HIDDEN TEMPLATE ROW -->
                                             <tr id="row_template" class="border-bottom d-none">
                                                 <td>
-                                                    <select class="form-select form-select-sm template-select">
+                                                    <select class="form-select form-select-sm template-select" style="width: 100%;">
                                                         <option value="">-- Select Product --</option>
                                                         <t t-foreach="products" t-as="product">
                                                             <option t-att-value="product.id"><t t-esc="product.display_name"/></option>
@@ -111,7 +123,7 @@
                                             <!-- FIRST ACTIVE ROW -->
                                             <tr id="row_0" class="border-bottom active-row">
                                                 <td>
-                                                    <select name="product_id_0" class="form-select form-select-sm searchable-select" required="required">
+                                                    <select name="product_id_0" class="form-select form-select-sm searchable-select" style="width: 100%;" required="required">
                                                         <option value="">-- Select Product --</option>
                                                         <t t-foreach="products" t-as="product">
                                                             <option t-att-value="product.id"><t t-esc="product.display_name"/></option>
@@ -149,137 +161,72 @@
                 </div>
             </div>
 
-            <!-- VIEW ORDER MODALS (Generated for each order on the page) -->
-            <t t-foreach="sale_orders" t-as="order">
-                <div class="modal fade" t-attf-id="viewOrderModal_{{ order.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-centered">
-                        <div class="modal-content" style="border-radius:14px; border:none;">
-                            <div class="modal-header bg-light border-0" style="border-radius: 14px 14px 0 0;">
-                                <h5 class="modal-title fw-bold">
-                                    Order <span class="text-primary" t-esc="order.name"/>
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <div class="row mb-4">
-                                    <div class="col-md-4 mb-3">
-                                        <small class="text-muted d-block">Status</small>
-                                        <t t-if="order.state in ['sale', 'done']">
-                                            <span class="badge bg-success">Confirmed</span>
-                                        </t>
-                                        <t t-elif="order.state == 'cancel'">
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        </t>
-                                        <t t-else="">
-                                            <span class="badge bg-warning text-dark">Quotation</span>
-                                        </t>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <small class="text-muted d-block">Order Date</small>
-                                        <span class="fw-semibold"><t t-esc="order.date_order.strftime('%d %b %Y') if order.date_order else 'N/A'"/></span>
-                                    </div>
-                                    <div class="col-md-4 mb-3 text-md-end">
-                                        <small class="text-muted d-block">Total Amount</small>
-                                        <span class="fw-bold fs-5 text-success">
-                                            <t t-esc="'%.2f' % order.amount_total"/> <t t-esc="order.currency_id.symbol"/>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <h6 class="fw-bold text-muted text-uppercase small letter-spacing-1 mb-2">Order Lines</h6>
-                                <div class="table-responsive border rounded">
-                                    <table class="table table-hover table-borderless align-middle mb-0">
-                                        <thead class="bg-light border-bottom">
-                                            <tr>
-                                                <th class="small text-muted">Product</th>
-                                                <th class="small text-muted text-center">Qty</th>
-                                                <th class="small text-muted text-end">Unit Price</th>
-                                                <th class="small text-muted text-end">Subtotal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="order.order_line" t-as="line">
-                                                <tr class="border-bottom">
-                                                    <td>
-                                                        <span class="fw-semibold" t-esc="line.product_id.name"/>
-                                                    </td>
-                                                    <td class="text-center" t-esc="line.product_uom_qty"/>
-                                                    <td class="text-end">
-                                                        <t t-esc="'%.2f' % line.price_unit"/> <t t-esc="order.currency_id.symbol"/>
-                                                    </td>
-                                                    <td class="text-end fw-semibold">
-                                                        <t t-esc="'%.2f' % line.price_subtotal"/> <t t-esc="order.currency_id.symbol"/>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </t>
-
-            <!-- Javascript for dynamic rows and Select2 -->
+            <!-- BULLETPROOF JAVASCRIPT -->
             <script type="text/javascript">
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Make sure jQuery and select2 exist in portal
-                    if (typeof jQuery !== 'undefined' &amp;&amp; jQuery.fn.select2) {
+                    let lineCount = 1;
+                    const tbody = document.getElementById('order_lines_body');
+                    const lineCountInput = document.getElementById('line_count');
+                    const addBtn = document.getElementById('add_line_btn');
+                    const modalEl = document.getElementById('createOrderModal');
 
-                        function initSelect2(selector) {
-                            jQuery(selector).select2({
-                                // Attach it deeper into the modal structure
-                                dropdownParent: jQuery('#createOrderModal .modal-content'),
+                    // 1. Reusable Select2 Initialization Function
+                    function initSelect2(element) {
+                        if (window.jQuery &amp;&amp; window.jQuery.fn.select2) {
+                            window.jQuery(element).select2({
+                                dropdownParent: window.jQuery('#createOrderModal .modal-content'),
                                 width: '100%',
                                 placeholder: "-- Select Product --"
                             });
                         }
+                    }
 
-                        // Init the first active row
-                        initSelect2('#row_0 .searchable-select');
+                    // 2. Initialize FIRST row using Vanilla JS Bootstrap Event Listener
+                    // This guarantees it fires exactly when the modal animation finishes
+                    if (modalEl) {
+                        modalEl.addEventListener('shown.bs.modal', function () {
+                            const firstSelect = document.querySelector('#row_0 .searchable-select');
 
-                        let lineCount = 1;
-                        const tbody = document.getElementById('order_lines_body');
-                        const lineCountInput = document.getElementById('line_count');
-                        const addBtn = document.getElementById('add_line_btn');
+                            // Prevent double-initialization
+                            if (firstSelect &amp;&amp; !firstSelect.classList.contains('select2-hidden-accessible')) {
+                                initSelect2(firstSelect);
+                            }
+                        });
+                    }
 
-                        if(addBtn) {
-                            addBtn.addEventListener('click', function() {
-                                // Clean clone from the hidden template
-                                const template = document.getElementById('row_template');
-                                const newRow = template.cloneNode(true);
+                    // 3. Add New Row Logic
+                    if(addBtn &amp;&amp; tbody) {
+                        addBtn.addEventListener('click', function() {
+                            const template = document.getElementById('row_template');
+                            const newRow = template.cloneNode(true);
 
-                                newRow.id = 'row_' + lineCount;
-                                newRow.classList.remove('d-none');
-                                newRow.classList.add('active-row');
+                            newRow.id = 'row_' + lineCount;
+                            newRow.classList.remove('d-none');
+                            newRow.classList.add('active-row');
 
-                                const select = newRow.querySelector('.template-select');
-                                select.name = 'product_id_' + lineCount;
-                                select.classList.remove('template-select');
-                                select.classList.add('searchable-select');
-                                select.required = true;
+                            const select = newRow.querySelector('.template-select');
+                            select.name = 'product_id_' + lineCount;
+                            select.classList.remove('template-select');
+                            select.classList.add('searchable-select');
+                            select.required = true;
 
-                                const input = newRow.querySelector('.qty-input');
-                                input.name = 'qty_' + lineCount;
-                                input.required = true;
+                            const input = newRow.querySelector('.qty-input');
+                            input.name = 'qty_' + lineCount;
+                            input.required = true;
 
-                                const delBtn = newRow.querySelector('.remove-line-btn');
-                                delBtn.addEventListener('click', function() {
-                                    newRow.remove();
-                                });
-
-                                tbody.appendChild(newRow);
-
-                                // Init Select2 on newly added element
-                                initSelect2(select);
-
-                                lineCount++;
-                                lineCountInput.value = lineCount;
+                            const delBtn = newRow.querySelector('.remove-line-btn');
+                            delBtn.addEventListener('click', function() {
+                                newRow.remove();
                             });
-                        }
-                    } else {
-                        console.warn("Select2 is not loaded in the portal. Dropdowns will be standard selects.");
+
+                            tbody.appendChild(newRow);
+
+                            // Initialize Select2 immediately because modal is already open
+                            initSelect2(select);
+
+                            lineCount++;
+                            lineCountInput.value = lineCount;
+                        });
                     }
                 });
             </script>
